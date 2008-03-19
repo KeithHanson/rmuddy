@@ -3,8 +3,8 @@ Kmuddy (http://www.kmuddy.com). It is essentially an easier,
 more powerful way (in my opinion, at least) to create complex
 triggering and tracking systems using the KMuddy client.
 
-With RMuddy, you have the flexibility of Ruby, and the ease
-of using a well-built framework. You'll have commands like:
+With RMuddy, you have the flexibility of Ruby, and the ability
+to communicate with KMuddy. You'll have commands like:
 
 trigger /regular_expression/, :action
 
@@ -24,8 +24,8 @@ give you a quick run-down of how to use the system and how to
 create your own Plugins.
 
 Currently, the plugins in the enabled-plugins directory are all
-written with Achaea (http://www.achaea.com) in mind, but they are
-all easily adaptible. 
+written with Achaea in mind (http://www.achaea.com), but they are
+all easily adaptible to your MUD of choice. 
 
 Though the author uses the plugins during every MUDing session,
 be warned: the state of RMuddy is very volatile. The author is in

@@ -1,0 +1,33 @@
+To Install:
+
+You will need the following:
+--A Version of KMuddy that supports External Scripting
+--Ruby 1.8 installed
+--Ruby headers installed
+--Git installed, to download and checkout the latest version.
+
+If you are on an Ubuntu box, you can do the following after installing KMuddy:
+In a command prompt, type:
+
+sudo apt-get install ruby1.8
+sudo apt-get install ruby1.8-dev
+sudo apt-get install git
+git clone git://github.com/KeithHanson/rmuddy.git ~/RMuddy
+
+After doing the above, simply go to:
+Profile-->Scripts
+Add...
+  Script Name: RMuddy
+  Command to Execute: ~/RMuddy/init.rb
+  Working Directory: ~/RMuddy/
+  Check Single-Instance Script
+  Check Enable Error Output
+  Check Disable Flow Control
+  Check Communicate Variables
+Click Ok
+
+Type into KMuddy:
+/exec RMuddy
+
+If you receive any errors during the output, please feel free
+to e-mail them to me and I'll do my best to address them. 
