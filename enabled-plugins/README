@@ -1,0 +1,63 @@
+Enabled Plugins should be dropped here.
+
+A Quick and Dirty tutorial on Plugins:
+
+Each and every plugin should be named the same name as 
+the module it represents.
+
+For example, the Ratter plugin is named ratter.rb. and is defined
+as module Ratter.
+
+Inside of every Module, you should have an _setup method. This method 
+gets called automatically whenever the module is loaded. It is here that
+you will define your triggers and before/after filters.
+
+You define a trigger like so:
+trigger /REGEXHERE/, :action_on_match
+
+After defining your triggers, you'll want to create a method that receives
+the matches from your regular expression. Like so:
+
+#Here is an example that has matches and uses them:
+def action_on_match(matches)
+  #Do things here
+  #access the first and second matches like so:
+  matches[1]
+  matches[2]
+end
+
+#Here is an example that does not have any matches:
+def action_on_match
+  #Do things here
+end
+
+A NOTE ABOUT TRIGGER ACTIONS:
+If your trigger's regular expression has backreferences/matches, 
+RMuddy will send the match object as a parameter to your action.
+
+If your trigger's regular expressions does not have backreferences, then
+RMuddy will not send the match object.
+
+Code responsibly ;)
+
+BEFORE AND AFTER FILTERS
+You can create before and after filters for firing off events before or 
+after an action is fired. You must define these in your _setup method.
+
+before PluginName, :plugin_action, :hook_action
+after PluginName, :plugin_action, :hook_action
+
+This will fire the action 'hook_action', passing it no parameters.
+
+
+SENDING INFORMATION TO KMUDDY
+You have three methods, all of them pretty self explanatory:
+
+#This will send "command text" to the MUD
+send_kmuddy_command("command text")
+
+#This will set $variable_name to value
+set_kmuddy_variable("variable_name", value)
+
+#This will return the value of the kmuddy variable $variable_name
+get_kmuddy_variable("variable_name") 

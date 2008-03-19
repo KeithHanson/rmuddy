@@ -1,0 +1,7 @@
+This folder is for config.yaml files for each plugin.
+
+The configs should be named the same name as the particular plugin.
+
+So, for instance, a CuringSystem plugin named curing_system.rb should
+be named curing_system.yaml. The RMuddy system will then know to 
+automatically pick that up parse it.

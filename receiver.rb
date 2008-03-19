@@ -15,7 +15,7 @@ class Receiver
     @triggers = {}
     @setups = []
     
-    Dir[File.join(File.dirname(__FILE__), "enabled-plugins", "*")].each do |file|
+    Dir[File.join(File.dirname(__FILE__), "enabled-plugins", "*.rb")].each do |file|
       @setups << File.basename(file, ".rb") + "_setup"
     end
     
@@ -27,7 +27,11 @@ class Receiver
       debug("Testing #{regex} against line: #{text}")
       match = regex.match(text)
       unless match.nil?
-        send(method.to_sym, match)
+        unless match[1].nil?
+          send(method.to_sym, match)
+        else
+          send(method.to_sym)
+        end
       else
         debug("No match!")
       end
