@@ -36,11 +36,11 @@ module Character
     set_kmuddy_variable("character_total_mana", @character_total_mana)
   end
 
-  def character_is_balanced(match_object)
+  def character_is_balanced
     @character_balanced = true
   end
 
-  def character_is_unbalanced(match_object)
+  def character_is_unbalanced
     @character_balanced = false
   end
   

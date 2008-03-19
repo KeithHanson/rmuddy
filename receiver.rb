@@ -5,7 +5,7 @@ class Receiver
   debug("Receiver: Loading Files...")
   
   #Load All Plugins
-  Dir[File.join(File.dirname(__FILE__), "enabled-plugins", "*")].each do |file|
+  Dir[File.join(File.dirname(__FILE__), "enabled-plugins", "*.rb")].each do |file|
     debug("Receiver: Found #{file}")
     require file
     include module_eval(File.basename(file, ".rb").capitalize)

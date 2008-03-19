@@ -8,16 +8,16 @@ module Ratter
 
     @total_rat_money = 0
 
-    trigger /With a squeak, an*(\s)*(\w)* rat darts into the room, looking about wildly./, :rat_is_available
-    trigger /Your eyes are drawn to an*(\s)*(\w)* rat that darts suddenly into view./, :rat_is_available
-    trigger /An*(\s)*(\w)* rat noses its way cautiously out of the shadows./, :rat_is_available
-    trigger /An*(\s)*(\w)* rat wanders into view, nosing about for food./, :rat_is_available
+    trigger /With a squeak, an*\s*\w* rat darts into the room, looking about wildly./, :rat_is_available
+    trigger /Your eyes are drawn to an*\s*\w* rat that darts suddenly into view./, :rat_is_available
+    trigger /An*\s*\w* rat noses its way cautiously out of the shadows./, :rat_is_available
+    trigger /An*\s*\w* rat wanders into view, nosing about for food./, :rat_is_available
     
     trigger /You have slain an*\s(.*\s*rat), retrieving the corpse./, :killed_rat
 
-    trigger /An*(\s)*(\w)* rat wanders back into its warren where you may not follow./, :rat_is_unavailable
-    trigger /With a flick of its small whiskers, an*(\s)*(\w)* rat dashes out of view./, :rat_is_unavailable
-    trigger /An*(\s)*(\w)* rat darts into the shadows and disappears./, :rat_is_unavailable
+    trigger /An*\s*\w* rat wanders back into its warren where you may not follow./, :rat_is_unavailable
+    trigger /With a flick of its small whiskers, an*\s*\w* rat dashes out of view./, :rat_is_unavailable
+    trigger /An*\s*\w* rat darts into the shadows and disappears./, :rat_is_unavailable
 
     trigger /You will now notice the movement of rats\. Happy hunting\!/, :enable_ratter
     trigger /You will no longer take notice of the movement of rats\./, :disable_ratter
@@ -35,7 +35,7 @@ module Ratter
     @available_rats > 0
   end
 
-  def rat_is_available(match_object)
+  def rat_is_available
     @available_rats += 1
 
     if rat_available? && @character_balanced
@@ -43,7 +43,7 @@ module Ratter
     end
   end
 
-  def rat_is_unavailable(match_object)
+  def rat_is_unavailable
     @available_rats -= 1 unless @available_rats <= 0
   end
 
@@ -58,15 +58,15 @@ module Ratter
     set_kmuddy_variable("total_rat_money", @total_rat_money)
   end
 
-  def enable_ratter(match_object)
+  def enable_ratter
     @ratter_enabled = true
   end
 
-  def disable_ratter(match_object)
+  def disable_ratter
     @ratter_enabled = false
   end
 
-  def reset_money(match_object)
+  def reset_money
     @total_rat_money = 0
 
     set_kmuddy_variable("total_rat_money", 0)

@@ -46,11 +46,11 @@ module Sipper
     end
   end
   
-  def disable_sip(match_object)
+  def disable_sip
     @sipper_enabled = false
   end
   
-  def enable_sip(match_object)
+  def enable_sip
     @sipper_enabled = true
   end
 end

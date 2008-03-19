@@ -1,0 +1,36 @@
+RMuddy is a Ruby based Triggering system for the MUD client 
+Kmuddy (http://www.kmuddy.com). It is essentially an easier,
+more powerful way (in my opinion, at least) to create complex
+triggering and tracking systems using the KMuddy client.
+
+With RMuddy, you have the flexibility of Ruby, and the ease
+of using a well-built framework. You'll have commands like:
+
+trigger /regular_expression/, :action
+
+before PluginName, :plugin_action, :hook_action
+
+after PluginName, :plugin_action, :hook_action
+
+send_kmuddy_command("command text")
+
+get_kmuddy_variable("variable_name")
+
+set_kmuddy_variable("variable_name", value)
+
+All of the magic happens inside of the enabled-plugins folder,
+which has an included README for you to peruse. The README will
+give you a quick run-down of how to use the system and how to 
+create your own Plugins.
+
+Currently, the plugins in the enabled-plugins directory are all
+written with Achaea (http://www.achaea.com) in mind, but they are
+all easily adaptible. 
+
+Though the author uses the plugins during every MUDing session,
+be warned: the state of RMuddy is very volatile. The author is in
+no way responsible for the death of your character, dry mana vials,
+or any other mishap that may happen from RMuddy crashing or going
+haywire.
+
+That being said, Enjoy!
