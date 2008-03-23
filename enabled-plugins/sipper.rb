@@ -30,7 +30,8 @@ module Sipper
     @mana_threshold_percentage = 70 
     
     #After every time the character's current stats are updated, we check to see if we should sip.
-    after Character, :character_set_current_stats, :should_i_sip?
+    after Character, :character_set_simple_stats, :should_i_sip?
+    after Character, :character_set_extended_stats, :should_i_sip?
     
     #This group of triggers disables the sipping for various reasons.
     trigger /^Your mind feels stronger and more alert\.$/, :disable_sip

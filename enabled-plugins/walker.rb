@@ -53,7 +53,7 @@ module Walker
     #The skip room method is used to skip places where it's considered rude to rat.
     #It also tries to skip places with people in them...
     trigger /The Crossroads\./, :skip_room
-    trigger /.* is here\./, :skip_room
+    trigger /is here\./, :skip_room
 
     trigger /There is no exit in that direction/, :lost!
     
