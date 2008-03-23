@@ -55,10 +55,12 @@ module Sipper
       #Otherwise, begin checking health and mana to see if we need to do some drinking...
       if health_below_threshold? && sipper_enabled?
         send_kmuddy_command("drink health")
+        @sipper_enabled = false
       end
 
       if mana_below_threshold? && sipper_enabled?
         send_kmuddy_command("drink mana")
+        @sipper_enabled = false
       end
     end
   end

@@ -6,7 +6,7 @@
 module Walker
   def walker_setup
     warn("RMuddy: Auto Walker Plugin Loaded!")
-    warn("RMuddy: ***The Auto Walker will fully automate your ratting and is considered ILLEGAL by Achaea.***"
+    warn("RMuddy: ***The Auto Walker will fully automate your ratting and is considered ILLEGAL by Achaea.***")
     warn("RMuddy: ***Use at your own risk!***")
  
     #When we backtrack along the rail, we'll need these.
@@ -51,7 +51,11 @@ module Walker
     trigger /Now now, don't be so hasty!/, :backtrack
 
     #The skip room method is used to skip places where it's considered rude to rat.
+    #It also tries to skip places with people in them...
     trigger /The Crossroads\./, :skip_room
+    trigger /.* is here\./, :skip_room
+
+    trigger /There is no exit in that direction/, :lost!
     
     #After doing any thing that would cause us to do something to a rat, reset the timers.
     after Ratter, :should_i_attack_rat?, :reset_rail_timer
@@ -112,7 +116,13 @@ module Walker
     end
   end
 
+  def lost!
+    @auto_walk_enabled = false
+    warn("RMuddy: Auto Walker is LOST! Disabling.")
+  end
+
   def increment_rail_position
+
     if @ratter_enabled && @auto_walk_enabled
       if @rail_position + 1 < @ratter_rail[@current_rail].length
         @rail_position += 1 
@@ -121,8 +131,10 @@ module Walker
 
         if @current_rail + 1 < @ratter_rail.length
           @current_rail += 1
+           warn "Auto Walker: Finished moving along current Rail. Loading Next Rail."
         else
           @current_rail = 0
+          warn "Auto Walker: Finished moving along last rail. Loading First Rail."
         end
       end
     end
@@ -133,8 +145,12 @@ module Walker
   end
 
   def backtrack
-    if @backtracking
-      warn "Auto Walker: Backtracking #{@rail_position} steps."
+    if @backtracking && @auto_walker_enabled
+      if @rail_position > 0
+        warn "Auto Walker: Backtracking #{@rail_position} steps."
+      else
+        warn "Auto Walker: Finished Backtracking."
+      end
       if @rail_position > 0
         @rail_position -= 1
         sleep 0.3
@@ -144,8 +160,10 @@ module Walker
 
         if @current_rail + 1 < @ratter_rail.length
           @current_rail += 1
+          warn "Auto Walker: Finished moving along current Rail. Loading Next Rail."
         else
           @current_rail = 0
+          warn "Auto Walker: Finished moving along last rail. Loading First Rail."
         end
       end
     end

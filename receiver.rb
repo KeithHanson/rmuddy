@@ -37,7 +37,7 @@ class Receiver
       end
     end
 
-    warn("RMuddy System Ready!")
+    warn("RMuddy: System Ready!")
   end
 
   def receive(text)
