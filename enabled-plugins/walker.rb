@@ -1,0 +1,169 @@
+#The Walker is a taaaaad bit more complex than the other plugins.
+#The main reason being that we need to use multi-threading to make timers work.
+#Essentially, we set our character down on a mono-rail of directions they should go through,
+#and from there let the room ratter do it's work. Every time we hit, see, or do anything to a rat,
+#we want to reset the timers again. Once the timer is up, move forward.
+module Walker
+  def walker_setup
+    warn("RMuddy: Auto Walker Plugin Loaded!")
+    warn("RMuddy: ***The Auto Walker will fully automate your ratting and is considered ILLEGAL by Achaea.***"
+    warn("RMuddy: ***Use at your own risk!***")
+ 
+    #When we backtrack along the rail, we'll need these.
+    @opposite_directions = { "n" => "s", "s" => "n", "e" => "w", "w" => "e", "ne" => "sw", "sw" => "ne", "nw" => "se", "se" => "nw", "in" => "out", "out" => "in", "u" => "d", "d" => "u"} 
+
+    #last_timer is essentially the last time the timer was started.
+    @last_timer = Time.now
+
+    #This is to seed the random number generator
+    #So we don't get duplicate sequences 
+    srand = Time.now.to_i
+
+    #This is where we define, how many seconds to wait, randomly 0-10
+    @seconds_to_wait = rand(10)
+
+    #default values. This is the position on our mono-rail, so to speak.
+    @rail_position = 0
+    @current_rail = 0
+
+    #The current thread that is doing the moving around. We'll have a reference to it here
+    #So we can kill it if need be.
+    @current_thread = nil
+
+    #The path to walk, the rail of our mono... or something of that nature ;)
+    #It is an array of arrays. First array holds all paths, inner array holds movements.
+    @ratter_rail = [
+                      %w(n n ne e n e ne e n ne e se e ne se ne n n e ne e n ne e se se e s s sw s s w sw nw w w sw w w nw w s s sw s s s sw w w w s w w nw sw nw nw n n),
+                      %w(n n ne e n e ne e n nw w nw sw nw n n ne se e ne e se ne n e e s se s s s se s s s s sw s s s sw w w w s w w nw sw nw nw n n)
+                         ]
+                           
+
+    #defaults
+    @auto_walk_enabled = false
+    @backtracking = false
+
+    #Since we moved and see a new room, we increment the rail position.
+    trigger /You see exits leading/, :increment_rail_position
+    trigger /You see a single exit/, :increment_rail_position
+
+    #The only time we ever care about moving too fast is when we're back-tracking.
+    #So when we see this message, we didn't hit our next room and need to try again.
+    trigger /Now now, don't be so hasty!/, :backtrack
+
+    #The skip room method is used to skip places where it's considered rude to rat.
+    trigger /The Crossroads\./, :skip_room
+    
+    #After doing any thing that would cause us to do something to a rat, reset the timers.
+    after Ratter, :should_i_attack_rat?, :reset_rail_timer
+
+    #Enable and disable the auto walker with these two after filters.
+    after Ratter, :enable_ratter, :enable_walker
+    after Ratter, :disable_ratter, :disable_walker
+
+    #This mother thread keeps track of the sub thread that does the timing.
+    Thread.new do 
+      while true do
+
+        if @auto_walk_enabled
+
+          @last_timer = Time.now
+          @seconds_to_wait = rand(10) + 10
+
+          @current_thread = Thread.new do 
+            while @last_timer + @seconds_to_wait >= Time.now do
+              #Wait until we pass our seconds to wait.
+            end
+            
+            #If we can walk, walk!
+            if @character_balanced && @auto_walk_enabled
+              send_kmuddy_command("#{@ratter_rail[@current_rail][@rail_position]}")
+            end
+          end
+
+          #Pauses mother thread until sub thread is finished.
+          @current_thread.join
+
+        end
+      end
+    end
+  end
+
+  def enable_walker
+    warn("RMuddy: Auto Walker turned on. (Used with the Room Ratter.)")
+    @auto_walk_enabled = true
+
+    reset_rail_timer
+  end
+
+  def disable_walker
+    warn("RMuddy: Auto Walker turned off. (Used with the Room Ratter.)")
+    @auto_walk_enabled = false
+    kill_thread
+    @backtracking = true
+    unless @rail_position <= 0
+      @rail_position -= 1 
+      send_kmuddy_command("#{@opposite_directions[@ratter_rail[@current_rail][@rail_position]]}")
+    end
+  end
+
+  def skip_room
+    if @auto_walk_enabled
+      send_kmuddy_command("#{@ratter_rail[@current_rail][@rail_position + 1]}")
+    end
+  end
+
+  def increment_rail_position
+    if @ratter_enabled && @auto_walk_enabled
+      if @rail_position + 1 < @ratter_rail[@current_rail].length
+        @rail_position += 1 
+      else
+        @rail_position = 0
+
+        if @current_rail + 1 < @ratter_rail.length
+          @current_rail += 1
+        else
+          @current_rail = 0
+        end
+      end
+    end
+
+    @available_rats = 0
+
+    backtrack
+  end
+
+  def backtrack
+    if @backtracking
+      warn "Auto Walker: Backtracking #{@rail_position} steps."
+      if @rail_position > 0
+        @rail_position -= 1
+        sleep 0.3
+        send_kmuddy_command("#{@opposite_directions[@ratter_rail[@current_rail][@rail_position]]}")
+      else
+        @backtracking = false
+
+        if @current_rail + 1 < @ratter_rail.length
+          @current_rail += 1
+        else
+          @current_rail = 0
+        end
+      end
+    end
+  end
+
+  def reset_rail_timer
+    @last_timer = Time.now
+    @seconds_to_wait = rand(10) + 5
+    #warn("Timers Reset")
+    #warn("Last Timer: #{@last_timer}")
+    #warn("Seconds to wait: #{@seconds_to_wait}")
+  end
+
+  def kill_thread
+    unless @current_thread.nil?
+      @current_thread.kill
+      @current_thread = nil
+    end
+  end
+
+end

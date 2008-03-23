@@ -1,4 +1,7 @@
 #!/usr/bin/env ruby
+
+DEBUG = false
+
 Dir[File.join(File.dirname(__FILE__), "gems", "gems", "*")].each do |gem_folder|
   $: << gem_folder + "/lib/"
 end
@@ -7,9 +10,6 @@ require File.join(File.dirname(__FILE__), "connection_handler.rb")
 require File.join(File.dirname(__FILE__), "receiver.rb")
 require 'yaml'
 require "ruby2ruby"
-
-
-DEBUG = false
 
 debug("Starting Receiver...")
 receiver = Receiver.new()

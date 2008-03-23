@@ -1,7 +1,5 @@
 #!/bin/env ruby
 
-DEBUG = false
-
 require 'socket'
 
 module KMuddy
@@ -36,7 +34,7 @@ module KMuddy
    end
 
    def warn(text)
-      $stderr.puts("-! #{text}")
+      $stderr.puts("\n-! #{text}")
    end
 
    def output(text)

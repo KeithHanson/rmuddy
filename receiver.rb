@@ -1,6 +1,6 @@
 class Receiver
   
-  attr_accessor :varsock, :matches, :setups
+  attr_accessor :varsock, :matches, :setups, :queue
   
   debug("Receiver: Loading Files...")
   
@@ -12,14 +12,32 @@ class Receiver
   end
   
   def initialize
+    warn("RMuddy: System Loading...")
     @triggers = {}
     @setups = []
+    @queue = []
     
     Dir[File.join(File.dirname(__FILE__), "enabled-plugins", "*.rb")].each do |file|
       @setups << File.basename(file, ".rb") + "_setup"
     end
     
     @setups.each {|setup_string| send(setup_string.to_sym)}
+    
+    Thread.new do
+      while true do
+        if @queue.length > 0
+          element = @queue.shift
+          case element[0]
+          when "set_var"
+            @varsock.set(element[1], element[2])
+          when "send_command"
+            @varsock.command(element[1])
+          end
+        end
+      end
+    end
+
+    warn("RMuddy System Ready!")
   end
 
   def receive(text)
@@ -43,7 +61,7 @@ class Receiver
   end
   
   def set_kmuddy_variable(variable_name, variable_value)
-    @varsock.set(variable_name, variable_value)
+    @queue << ["set_var", variable_name, variable_value]
   end
   
   def get_kmuddy_variable(variable_name)
@@ -51,7 +69,7 @@ class Receiver
   end
   
   def send_kmuddy_command(command_text)
-    @varsock.command(command_text)
+    @queue << ["send_command", command_text]
   end
   
   def before(module_name, method_symbol, hook_symbol)
