@@ -49,7 +49,7 @@ module Character
     unless @using_extended_stats == true
       @character_current_health = match_object[1].to_i
       @character_current_mana = match_object[2].to_i
-      @character_status = match_object[3].to_i
+      @character_status = match_object[3].to_s
       @character_balanced = @character_status.include? "x"
       @character_has_equilibrium = @character_status.include? "e"
 
@@ -67,7 +67,7 @@ module Character
     @character_current_mana = match_object[2].to_i
     @character_current_endurance = match_object[3].to_i
     @character_current_willpower = match_object[4].to_i
-    @character_status = match_object[5].to_i
+    @character_status = match_object[5].to_s
     @character_balanced = @character_status.include? "x"
     @character_has_equilibrium = @character_status.include? "e"
     debug("Character: Loaded Current Stats")
