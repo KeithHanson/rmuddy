@@ -5,7 +5,9 @@ class VariableSock
       if ENV.has_key?('KMUDDY_SOCKET')
          @socket_name = ENV['KMUDDY_SOCKET']
       else
-         warn("Variable KMUDDY_SOCKET is not set - variable support won't work!")
+         warn("*" * 80)
+         warn("RMuddy: Please Check COMMUNICATE VARIABLES In The Script Configuration.")
+         warn("*" * 80)
       end
 
       begin
