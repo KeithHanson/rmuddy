@@ -95,21 +95,29 @@ module Extendedcharacter
   def character_set_total_health(match_object )
     @character_total_health = match_object[2].to_i
     @character_current_health = match_object[1].to_i
+    set_kmuddy_variable("character_current_health", @character_current_health)
+    set_kmuddy_variable("character_total_health", @character_total_health)
   end
   
   def character_set_total_mana(match_object )
     @character_total_mana = match_object[2].to_i
     @character_current_mana = match_object[1].to_i
+    set_kmuddy_variable("character_current_mana", @character_current_mana)
+    set_kmuddy_variable("character_total_mana", @character_total_mana)
   end
   
   def character_set_total_endurance(match_object )
     @character_total_endurance = match_object[2].to_i
     @character_current_endurance = match_object[1].to_i
+    set_kmuddy_variable("character_current_endurance", @character_current_endurance)
+    set_kmuddy_variable("character_total_endurance", @character_total_endurance)
   end
   
   def character_set_total_willpower(match_object )
     @character_total_willpower = match_object[2].to_i
     @character_current_willpower = match_object[1].to_i
+    set_kmuddy_variable("character_current_willpower", @character_current_willpower)
+    set_kmuddy_variable("character_total_willpower", @character_total_willpower)
   end
 
   def character_is_balanced
