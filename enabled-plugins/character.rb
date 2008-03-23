@@ -57,6 +57,8 @@ module Character
       
       set_kmuddy_variable("character_current_health", @character_current_health)
       set_kmuddy_variable("character_current_mana", @character_current_mana)
+      set_kmuddy_variable("character_balanced", @character_balanced)
+      set_kmuddy_variable("character_has_equilibrium", @character_has_equilibrium)
     end
   end
 
