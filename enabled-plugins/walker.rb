@@ -117,8 +117,10 @@ module Walker
   end
 
   def lost!
-    @auto_walk_enabled = false
-    warn("RMuddy: Auto Walker is LOST! Disabling.")
+    if @auto_walk_enabled == true
+      warn("RMuddy: Auto Walker is LOST! Disabling.")
+      @auto_walk_enabled = false
+    end
   end
 
   def increment_rail_position
@@ -145,11 +147,13 @@ module Walker
   end
 
   def backtrack
-    if @backtracking && @auto_walker_enabled
+    if @backtracking
+      warn("We're backtracking")
       if @rail_position > 0
         warn "Auto Walker: Backtracking #{@rail_position} steps."
       else
         warn "Auto Walker: Finished Backtracking."
+        disable_walker
       end
       if @rail_position > 0
         @rail_position -= 1
@@ -184,4 +188,4 @@ module Walker
     end
   end
 
-end
+end 
