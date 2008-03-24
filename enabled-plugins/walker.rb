@@ -79,7 +79,7 @@ module Walker
             end
             
             #If we can walk, walk!
-            if @character_balanced && @auto_walk_enabled
+            if @character_balanced && @character_has_equilibrium && @auto_walk_enabled
               send_kmuddy_command("#{@ratter_rail[@current_rail][@rail_position]}")
             end
           end
