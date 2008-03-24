@@ -13,6 +13,12 @@ module Ratter
     #By default, we will disable the ratter.
     @ratter_enabled = false
 
+    #This determines if we're a balance user or an equilibrium user...
+    @balance_user = true
+    
+    #What do we do when we want them dead?
+    @attack_command = "bop rat"
+
     #Set the current room's rats to 0
     @available_rats = 0
 
@@ -47,7 +53,11 @@ module Ratter
     trigger /Liirup squeals with delight/, :reset_money
 
     #After we gain balance, we need to decide if we should attack again or not.
-    after Character, :character_is_balanced, :should_i_attack_rat?
+    if @balance_user
+      after Character, :character_is_balanced, :should_i_attack_rat?
+    else
+      after Character, :character_has_equilibrium, :should_i_attack_rat?
+    end
   end
 
   def ratter_enabled?
@@ -63,9 +73,14 @@ module Ratter
     @available_rats += 1
 
     #first make sure that we are balanced and there are rats available
-    if rat_available? && @character_balanced
-      #attack
-      send_kmuddy_command("bop rat")
+    if @balance_user
+      if rat_available? && @character_balanced
+        send_kmuddy_command(@attack_command)
+      end
+    else
+      if rat_available? && @character_has_equilibrium
+        send_kmuddy_command(@attack_command)
+      end
     end
   end
 
@@ -112,8 +127,14 @@ module Ratter
   
   #Decide whether or not we should attack a rat and do so if we can.
   def should_i_attack_rat?
-    if rat_available? && @character_balanced
-      send_kmuddy_command("bop rat")
+    if @balance_user
+      if rat_available? && @character_balanced
+        send_kmuddy_command(@attack_command)
+      end
+    else
+      if rat_available? && @character_has_equilibrium
+        send_kmuddy_command(@attack_command)
+      end
     end
   end
 end
