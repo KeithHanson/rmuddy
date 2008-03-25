@@ -20,14 +20,25 @@ class ConnectionHandler
   
   def start
     @threads << Thread.new {
-       while line = STDIN.gets.chomp
-          # Normally one would parse the line of text from the server here.
-          # Instead, I demonstrate the 'set' method of the VariableSock.
-          # Check your variables in KMuddy after you receive text from the
-          # mud.
-          @receiver.receive(line)
-       end
+      while line = STDIN.gets.chomp
+        # Normally one would parse the line of text from the server here.
+        # Instead, I demonstrate the 'set' method of the VariableSock.
+        # Check your variables in KMuddy after you receive text from the
+        # mud.
+        @receiver.receive(line)
+      end
     }
+
+   threads << Thread.new {
+      while (event = evserver.accept)
+          line = event.gets.chomp
+          debug("Received Line: #{line}") unless line.empty?
+          exit(0) if line == "quit"
+          #varsock.command(line)
+          @receiver.receive(line)
+          event.close
+      end
+}
 
     @threads.each { |task| task.join }
   end
