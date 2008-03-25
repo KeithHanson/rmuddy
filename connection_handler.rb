@@ -29,7 +29,7 @@ class ConnectionHandler
       end
     }
 
-   threads << Thread.new {
+   @threads << Thread.new {
       while (event = evserver.accept)
           line = event.gets.chomp
           debug("Received Line: #{line}") unless line.empty?
