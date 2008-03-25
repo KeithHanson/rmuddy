@@ -55,6 +55,16 @@ class Receiver
       end
     end
   end
+
+  def command(text)
+    method_and_args = text.split(" ")
+    klass = module_eval(method_and_args[0])
+    method_sym = method_and_args[1].to_sym
+    args = method_and_args[2..-1]
+    
+    debug("RMuddy: Sending to Plugin #{klass.name.to_s}::#{method_sym.to_s} with arguments #{args.join(", ")}")
+    self::klass.send(method_sym, *args)
+  end
   
   def trigger(regex, method)
     @triggers[regex] = method
