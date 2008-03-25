@@ -14,10 +14,10 @@ module Ratter
     @ratter_enabled = false
 
     #This determines if we're a balance user or an equilibrium user...
-    @balance_user = true
+    @balance_user = false
     
     #What do we do when we want them dead?
-    @attack_command = "bop rat"
+    @attack_command = "warp rat"
 
     #Set the current room's rats to 0
     @available_rats = 0
@@ -49,6 +49,8 @@ module Ratter
     trigger /You will now notice the movement of rats\. Happy hunting\!/, :enable_ratter
     trigger /You will no longer take notice of the movement of rats\./, :disable_ratter
     
+    #sell your rats when you come into the room Liirup is in!
+    trigger /Liirup the Placid stands here/, :sell_rats
     #Reset the money after selling to the ratter in hashan.
     trigger /Liirup squeals with delight/, :reset_money
 
@@ -123,6 +125,10 @@ module Ratter
     @inventory_rats = 0
 
     set_kmuddy_variable("current_rat_count", 0)
+    send_kmuddy_command("put sovereigns in pack")
+  end
+  def sell_rats
+    send_kmuddy_command("Sell rats to Liirup")
   end
   
   #Decide whether or not we should attack a rat and do so if we can.
