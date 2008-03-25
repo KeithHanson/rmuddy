@@ -27,7 +27,7 @@ module Sipper
 
     #Our health and mana thresholds
     @health_threshold_percentage = 70
-    @mana_threshold_percentage = 70 
+    @mana_threshold_percentage = 40
     
     #After every time the character's current stats are updated, we check to see if we should sip.
     after Character, :character_set_simple_stats, :should_i_sip?
@@ -39,11 +39,10 @@ module Sipper
     trigger /^What is it that you wish to drink\?$/, :disable_sip
     trigger /^You are asleep and can do nothing\./, :disable_sip
     trigger /^The elixer flows down your throat without effect/, :disable_sip
-    trigger /Wisely preparing yourself beforehand/, :disable_sip
+    trigger /Wisely preparing yourself beforehand/, :sip_inscribe
     
     #This group of triggers, substantially smaller, enables the sipping when we can :)
     trigger /^You may drink another .*$/, :enable_sip    
-    trigger /You have successfully inscribed the image/, :enable_sip
   end
   
   #The heart of the plugin...
@@ -51,19 +50,21 @@ module Sipper
     #If we don't have our total scores, issue a score and allow the Character plugin to update them.
     if @character_total_mana.nil? || @character_total_health.nil?
       send_kmuddy_command("score")
-    else
-
+    elsif !@inscribing
       #Otherwise, begin checking health and mana to see if we need to do some drinking...
       if health_below_threshold? && sipper_enabled?
         send_kmuddy_command("drink health")
         @sipper_enabled = false
       end
-
       if mana_below_threshold? && sipper_enabled?
         send_kmuddy_command("drink mana")
         @sipper_enabled = false
       end
     end
+  end
+  
+  def sip_inscribe
+    @inscribing = true
   end
   
   def disable_sip
