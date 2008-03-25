@@ -14,7 +14,9 @@ module Walker
 
     #last_timer is essentially the last time the timer was started.
     @last_timer = Time.now
-
+    
+    #lost or not? Well, let's see
+    @lost_or_not = 0
     #This is to seed the random number generator
     #So we don't get duplicate sequences 
     srand = Time.now.to_i
@@ -55,7 +57,7 @@ module Walker
     trigger /The Crossroads\./, :skip_room
     trigger /is here\./, :skip_room
 
-    trigger /There is no exit in that direction/, :lost!
+    trigger /There is no exit in that direction/, :misguided
     
     #After doing any thing that would cause us to do something to a rat, reset the timers.
     after Ratter, :should_i_attack_rat?, :reset_rail_timer
@@ -115,6 +117,15 @@ module Walker
       send_kmuddy_command("#{@ratter_rail[@current_rail][@rail_position + 1]}")
     end
   end
+  def misguided
+    @lost_or_not += 1
+    if @lost_or_not < 3
+      @rail_position -= 2
+    else
+      lost!
+    end
+  end
+
 
   def lost!
     if @auto_walk_enabled == true

@@ -128,7 +128,9 @@ module Ratter
     send_kmuddy_command("put sovereigns in pack")
   end
   def sell_rats
-    send_kmuddy_command("Sell rats to Liirup")
+    if @ratter_enabled
+      send_kmuddy_command("Sell rats to Liirup")
+    end
   end
   
   #Decide whether or not we should attack a rat and do so if we can.
