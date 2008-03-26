@@ -50,6 +50,10 @@ module Hermittracker
     end
   end
   
+  def hermit_list
+    @hermithash.each_key { |key| puts key }
+  end
+  
   def hermit_drop
     if @charginghermit
       send_kmuddy_command("fling hermit at ground")
