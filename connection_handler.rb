@@ -35,7 +35,7 @@ class ConnectionHandler
           debug("Received Line: #{line}") unless line.empty?
           exit(0) if line == "quit"
           #varsock.command(line)
-          @receiver.receive(line)
+          @receiver.command(line)
           event.close
       end
 }
