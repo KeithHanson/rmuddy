@@ -22,10 +22,6 @@ attr_accessor :inscribing
     @type_to_inscribe = 0
   end
   
-  def test_this
-    warn("testing...")
-  end
-  
   def set_number_to_inscribe (match_object )
     @number_to_inscribe = match_object[1].to_i
     @type_to_inscribe = match_object[2].to_s

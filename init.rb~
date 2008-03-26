@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-DEBUG = true
+DEBUG = false
 
 Dir[File.join(File.dirname(__FILE__), "gems", "gems", "*")].each do |gem_folder|
   $: << gem_folder + "/lib/"
