@@ -30,7 +30,7 @@ class ConnectionHandler
     }
 
    @threads << Thread.new {
-      while (event = evserver.accept)
+      while (event = @evserver.accept)
           line = event.gets.chomp
           debug("Received Line: #{line}") unless line.empty?
           exit(0) if line == "quit"
