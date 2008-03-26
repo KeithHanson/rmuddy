@@ -68,6 +68,7 @@ class Receiver
     
     Thread.new do
       while true do
+        sleep 0.1
         if @queue.length > 0
           element = @queue.shift
           case element[0]
