@@ -1,27 +1,70 @@
 class Receiver
   
-  attr_accessor :varsock, :matches, :setups, :queue
+  attr_accessor :varsock, :enabled_plugins, :disabled_plugins, :queue
   
+  def plugins
+    @enabled_plugins
+  end
+
   debug("Receiver: Loading Files...")
-  
+
   #Load All Plugins
   Dir[File.join(File.dirname(__FILE__), "enabled-plugins", "*.rb")].each do |file|
     debug("Receiver: Found #{file}")
     require file
-    include module_eval(File.basename(file, ".rb").capitalize)
+    attr_accessor File.basename(file, ".rb").to_sym
   end
   
   def initialize
     warn("RMuddy: System Loading...")
-    @triggers = {}
-    @setups = []
     @queue = []
-    
-    Dir[File.join(File.dirname(__FILE__), "enabled-plugins", "*.rb")].each do |file|
-      @setups << File.basename(file, ".rb") + "_setup"
+    @enabled_plugins = []
+
+    class << @enabled_plugins
+      alias_method :original_indexer, :[]
+
+      def [](arg)
+        if arg.is_a?(Class)
+          each do |plugin|
+            if plugin.is_a?(arg)
+              return plugin
+            end
+          end
+
+          return nil
+        else
+          original_indexer(arg)
+        end
+      end
+    end
+ 
+    @disabled_plugins = []
+
+    class << @disabled_plugins
+      alias_method :original_indexer, :[]
+
+      def [](arg)
+        if arg.is_a?(Class)
+          each do |plugin|
+            if plugin.is_a?(arg)
+              return plugin
+            end
+          end
+
+          return nil
+        else
+          original_indexer(arg)
+        end
+      end
     end
     
-    @setups.each {|setup_string| send(setup_string.to_sym)}
+    Dir[File.join(File.dirname(__FILE__), "enabled-plugins", "*.rb")].each do |file|
+      basename = File.basename(file, ".rb")
+      class_string = basename.split("_").each{|part| part.capitalize!}.join("")
+
+      instantiated_class = Object.module_eval(class_string).new(self)
+      instantiated_class.enable
+    end
     
     Thread.new do
       while true do
@@ -37,73 +80,60 @@ class Receiver
       end
     end
 
+    warn("=" * 80)
+    warn("You may send commands to RMuddy's plugins like so:")
+    warn("/notify 4567 PluginName action_name arg1 arg2 arg3")
+    warn("=" * 80)
+    warn("You may ask a plugin for help by doing:")
+    warn("/notify 4567 PluginName help")
+    warn("=" * 80)
     warn("RMuddy: System Ready!")
   end
 
   def receive(text)
-    @triggers.each_pair do |regex, method|
-      debug("Testing #{regex} against line: #{text}")
-      match = regex.match(text)
-      unless match.nil?
-        unless match[1].nil?
-          send(method.to_sym, match)
+    @enabled_plugins.each do |klass|
+      klass.triggers.each_pair do |regex, method|
+        debug("Testing Plugin: #{klass.to_s}| Regex: #{regex} against line: #{text}")
+        match = regex.match(text)
+        unless match.nil?
+          debug("Match!")
+          unless match[1].nil?
+            klass.send(method.to_sym, match)
+          else
+            klass.send(method.to_sym)
+          end
         else
-          send(method.to_sym)
+          debug("No match!")
         end
-      else
-        debug("No match!")
       end
     end
   end
 
   def command(text)
+    debug("RMuddy received notify command: #{text} ")
     method_and_args = text.split(" ")
-    klass = module_eval(method_and_args[0])
+
+    klass = Object.module_eval("#{method_and_args[0]}")
+  
     method_sym = method_and_args[1].to_sym
     args = method_and_args[2..-1]
-    
-    debug("RMuddy: Sending to Plugin #{klass.name.to_s}::#{method_sym.to_s} with arguments #{args.join(", ")}")
-    self::klass.send(method_sym, *args)
-  end
-  
-  def trigger(regex, method)
-    @triggers[regex] = method
-  end
-  
-  def set_kmuddy_variable(variable_name, variable_value)
-    @queue << ["set_var", variable_name, variable_value]
-  end
-  
-  def get_kmuddy_variable(variable_name)
-    @varsock.get(variable_name)
-  end
-  
-  def send_kmuddy_command(command_text)
-    @queue << ["send_command", command_text]
-  end
-  
-  def before(module_name, method_symbol, hook_symbol)
-    method = Ruby2Ruby.translate(module_name, method_symbol.to_sym)
-    
-    new_method = method.split("\n")
-    new_method.insert(1, "send(:#{hook_symbol.to_s})")
-    
-    module_name.module_eval(new_method.join("\n"))
-  end
-  
-  def after(module_name, method_symbol, hook_symbol)
-    method = Ruby2Ruby.translate(module_name, method_symbol.to_sym)
-    
-    new_method = method.split("\n")
-    
-    new_method.insert(-2, "send(:#{hook_symbol.to_s})")
-    
-    module_name.module_eval(new_method.join("\n"))
-  end
-  
-  def to_s
-    "Receiver Loaded"
-  end
-end
+    unless method_sym == :enable
+      @enabled_plugins.each do |plugin|
+        if plugin.is_a?(klass)
+          unless args.empty?
+            plugin.send(method_sym, *args)
+          else
+            plugin.send(method_sym)
+          end #args check
+        end #check the class of the plugin
+      end #loop through enabled plugins
+    else # Check to see if it's an enable command
+      @disabled_plugins.each do |plugin|
+        if plugin.is_a?(klass)
+          plugin.send(:enable)
+        end #check for class of the plugin
+      end #looping through the disabled plugins
+    end # end of check for :enable
+  end #end of Command method.
 
- 
+end

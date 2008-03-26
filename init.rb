@@ -7,6 +7,7 @@ Dir[File.join(File.dirname(__FILE__), "gems", "gems", "*")].each do |gem_folder|
 end
 
 require File.join(File.dirname(__FILE__), "connection_handler.rb")
+require File.join(File.dirname(__FILE__), "base_plugin.rb")
 require File.join(File.dirname(__FILE__), "receiver.rb")
 require 'yaml'
 require "ruby2ruby"

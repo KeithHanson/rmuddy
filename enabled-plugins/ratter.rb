@@ -7,17 +7,20 @@
 
 #This has currently been customized for the Jester class and for ratting in Hashani.
 #Further configurability to come.
-module Ratter
-  def ratter_setup
-    warn("RMuddy: Room Ratter Plugin Loaded!")
+class Ratter < BasePlugin
+
+  attr_accessor :ratter_enabled, :balance_user, :attack_command, :available_rats
+  attr_accessor :inventory_rats, :rat_prices, :total_rat_money
+
+  def setup
     #By default, we will disable the ratter.
     @ratter_enabled = false
 
     #This determines if we're a balance user or an equilibrium user...
-    @balance_user = false
+    @balance_user = true
     
     #What do we do when we want them dead?
-    @attack_command = "warp rat"
+    @attack_command = "bop rat"
 
     #Set the current room's rats to 0
     @available_rats = 0
@@ -54,12 +57,12 @@ module Ratter
     #Reset the money after selling to the ratter in hashan.
     trigger /Liirup squeals with delight/, :reset_money
 
+    trigger /You see exits/, :reset_available_rats
+    trigger /You see a single exit/, :reset_available_rats
+
     #After we gain balance, we need to decide if we should attack again or not.
-    if @balance_user
-      after Character, :character_is_balanced, :should_i_attack_rat?
-    else
-      after Character, :character_has_equilibrium, :should_i_attack_rat?
-    end
+    after Character, :set_simple_stats, :should_i_attack_rat?
+    after Character, :set_extended_stats, :should_i_attack_rat?
   end
 
   def ratter_enabled?
@@ -73,17 +76,6 @@ module Ratter
   def rat_is_available
     #increment the available rats in the room by one.
     @available_rats += 1
-
-    #first make sure that we are balanced and there are rats available
-    if @balance_user
-      if rat_available? && @character_balanced
-        send_kmuddy_command(@attack_command)
-      end
-    else
-      if rat_available? && @character_has_equilibrium
-        send_kmuddy_command(@attack_command)
-      end
-    end
   end
 
   def rat_is_unavailable
@@ -127,20 +119,23 @@ module Ratter
     set_kmuddy_variable("current_rat_count", 0)
     send_kmuddy_command("put sovereigns in pack")
   end
+  
+  def reset_available_rats
+    @available_rats = 0
+  end
+
   def sell_rats
-    if @ratter_enabled
-      send_kmuddy_command("Sell rats to Liirup")
-    end
+    send_kmuddy_command("Sell rats to Liirup")
   end
   
   #Decide whether or not we should attack a rat and do so if we can.
   def should_i_attack_rat?
     if @balance_user
-      if rat_available? && @character_balanced
+      if rat_available? && plugins[Character].balanced
         send_kmuddy_command(@attack_command)
       end
     else
-      if rat_available? && @character_has_equilibrium
+      if rat_available? && plugins[Character].has_equilibrium
         send_kmuddy_command(@attack_command)
       end
     end

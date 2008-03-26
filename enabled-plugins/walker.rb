@@ -3,9 +3,12 @@
 #Essentially, we set our character down on a mono-rail of directions they should go through,
 #and from there let the room ratter do it's work. Every time we hit, see, or do anything to a rat,
 #we want to reset the timers again. Once the timer is up, move forward.
-module Walker
-  def walker_setup
-    warn("RMuddy: Auto Walker Plugin Loaded!")
+class Walker < BasePlugin
+  attr_accessor :opposite_directions, :last_timer, :lost_or_not, :seconds_to_wait
+  attr_accessor :rail_position, :current_rail, :current_thread, :ratter_rail, :auto_walk_enabled
+  attr_accessor :back_tracking
+
+  def setup
     warn("RMuddy: ***The Auto Walker will fully automate your ratting and is considered ILLEGAL by Achaea.***")
     warn("RMuddy: ***Use at your own risk!***")
  
@@ -77,11 +80,11 @@ module Walker
 
           @current_thread = Thread.new do 
             while @last_timer + @seconds_to_wait >= Time.now do
-              #Wait until we pass our seconds to wait.
+              sleep 1
             end
             
             #If we can walk, walk!
-            if @character_balanced && @character_has_equilibrium && @auto_walk_enabled
+            if plugins[Character].balanced && plugins[Character].has_equilibrium && @auto_walk_enabled
               send_kmuddy_command("#{@ratter_rail[@current_rail][@rail_position]}")
             end
           end
@@ -136,7 +139,7 @@ module Walker
 
   def increment_rail_position
 
-    if @ratter_enabled && @auto_walk_enabled
+    if plugins[Ratter].ratter_enabled && @auto_walk_enabled
       if @rail_position + 1 < @ratter_rail[@current_rail].length
         @rail_position += 1 
       else
@@ -151,8 +154,6 @@ module Walker
         end
       end
     end
-
-    @available_rats = 0
 
     backtrack
   end

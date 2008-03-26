@@ -25,6 +25,7 @@ class ConnectionHandler
         # Instead, I demonstrate the 'set' method of the VariableSock.
         # Check your variables in KMuddy after you receive text from the
         # mud.
+        debug("Received a line!")
         @receiver.receive(line)
       end
     }
