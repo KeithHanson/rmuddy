@@ -19,20 +19,25 @@ class Hermit_tracker < BasePlugin
   
   def activate_hermit(key)
     if key == ''
-      warn("You must supply a word to associate this room with!!")
+      warn("Rmuddy: You must supply a word to associate this room with!!")
     else
-      warn("Ok, activating a hermit for this room")
+      @key = key
+      warn("Rmuddy: Ok, activating a hermit for this room")
       send_kmuddy_command("outd hermit")
       send_kmuddy_command("ii hermit")
-      @key = key
-      warn("Associating card #{@whichhermit} with the place name #{@key}")
-      @hermithash[key] = @whichhermit
-      send_kmuddy_command("activate hermit")
     end
+
   end
   
   def set_value(match_object )
     @whichhermit = match_object[1]
+    associate_hermit
+  end
+  
+  def associate_hermit
+      warn("Rmuddy: Associating card #{@whichhermit} with the place name #{@key}")
+      @hermithash[@key] = @whichhermit
+      send_kmuddy_command("activate hermit")
   end
   
   def save_hash
@@ -51,7 +56,8 @@ class Hermit_tracker < BasePlugin
   end
   
   def hermit_list
-    @hermithash.each_key { |key| puts key }
+    wanr("Rmuddy: Hermits currently in database")
+    @hermithash.each_key { |key| warn("Rmuddy: #{key}") }
   end
   
   def hermit_drop
