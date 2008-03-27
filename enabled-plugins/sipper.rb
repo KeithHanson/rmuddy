@@ -50,7 +50,7 @@ module Sipper
     #If we don't have our total scores, issue a score and allow the Character plugin to update them.
     if @character_total_mana.nil? || @character_total_health.nil?
       send_kmuddy_command("score")
-    elsif !@inscribing
+    else 
       #Otherwise, begin checking health and mana to see if we need to do some drinking...
       if health_below_threshold? && sipper_enabled?
         send_kmuddy_command("drink health")

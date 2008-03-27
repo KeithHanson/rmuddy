@@ -6,7 +6,7 @@ include KMuddy
 
 class ConnectionHandler
   def initialize(receiver)
-    $server_port = 4567
+    $server_port = 5678
     debug("ConnectionHandler--Server Port: #{$server_port}")
 
     @evserver = EventServer.new($server_port)

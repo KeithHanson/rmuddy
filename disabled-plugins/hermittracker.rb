@@ -15,7 +15,10 @@ module Hermittracker
     
     #Let the user know we're loading the hash
     warn("Rmuddy: Loading hermit locations database")
-    @hermithash = YAML.load(File.open("configs/hermithash.yaml"))
+    file = File.open("configs/hermithash.yaml")
+    @hermithash = YAML.load(file)
+    file.close
+    hermit_list
     warn("Rmuddy: Hash loaded, database open, hermit away")
     
     #trigger set, in RMuddy DSL, for when you check the hermit you are
