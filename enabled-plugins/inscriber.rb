@@ -12,20 +12,18 @@ attr_accessor :inscribing
 
   def setup
     #setup our triggers for commands... will be deprecated when /notify works
-    trigger /ins (\d+) (\w+)/, :set_number_to_inscribe  #command to set params
-    trigger /startins/, :should_we_inscribe?            #command to go!
     trigger /You have successfully inscribed/, :decrement_counter #we did it!
     trigger /^You lack the mental resources to etch a Tarot card./, :out_of_mana! #oops, ran out of mana
     
     #by default, we are not, in fact, inscribing
     @inscribing = false
     @number_to_inscribe = 0
-    @type_to_inscribe = 0
+    @type_to_inscribe = ""
   end
   
   def mass_inscribe(number_to_inscribe, type_to_inscribe)
     @number_to_inscribe = number_to_inscribe.to_i
-    @type_to_inscribe = type_to_inscribe
+    @type_to_inscribe = type_to_inscribe.to_s
     set_kmuddy_variable("number_to_inscribe", @number_to_inscribe)
     set_kmuddy_variable("type_to_inscribe", @type_to_inscribe)
     warn("Inscriber Plugin: Ready to inscribe #{@number_to_inscribe} #{@type_to_inscribe}")
@@ -36,18 +34,11 @@ attr_accessor :inscribing
     inscribe_tarot
   end
 
-  #def set_number_to_inscribe (match_object )   #so we need to actually set the params
-  #  @number_to_inscribe = match_object[1].to_i #so we match to the trigger
-  #  @type_to_inscribe = match_object[2].to_s   #and do it
-  #  set_kmuddy_variable("number_to_inscribe", @number_to_inscribe)  #and push back to kmuddy
-  #  set_kmuddy_variable("type_to_inscribe", @type_to_inscribe)
-  #end
-  
   def inscribe_tarot   #here's how we actually inscribe the bloody cards
     disabled_plugins[Sipper].enable unless disabled_plugins[Sipper].nil?
     plugins[Sipper].should_i_sip? #check to see if we need mana before we inscribe
     plugins[Sipper].disable #then disable the sipper so as not to kill our inscribe
-    send_kmuddy_command("inscribe blank with $type_to_inscribe")  #and actually inscribe
+    send_kmuddy_command("inscribe blank with #{@type_to_inscribe}")  #and actually inscribe
   end
   
   def decrement_counter  #lower the counter, so we inscribe the correct # of cards
@@ -66,7 +57,7 @@ attr_accessor :inscribing
       inscribe_tarot   #then inscribe
     elsif @number_to_inscribe == 0  #otherwise, if there are 0 left to do
       disabled_plugins[Sipper].enable unless disabled_plugins[Sipper].nil?
-      send_kmuddy_command("ind 50 $type_to_inscribe")  #put the cards away
+      send_kmuddy_command("ind 50 #{@type_to_inscribe}")  #put the cards away
       plugins[Sipper].should_i_sip? #check if we need to sip 
     end
   end

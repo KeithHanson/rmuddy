@@ -1,15 +1,15 @@
 #Module for tracking where you have charged Hermit tarot cards in achaea
-#USAGE: /notify 4567 Hermittracker activate_hermit <word to associate room with>
-#       /notify 4567 Hermittracker fling_hermit <word you tagged the room you want to go to with>
+#USAGE: /notify 4567 Hermittracker activate_hermit <tag to associate room with>
+#       /notify 4567 Hermittracker fling_hermit <room-tag>
 #The tracker -should- automagically keep track of which card you charged, and 
 #where, and get it from your pack.
-module Hermittracker
-  def hermittracker_setup
+class Hermit_tracker < BasePlugin
+  def setup
     @whichhermit = ''
     @key = ''
     @charginghermit = false
     warn("Loading hermit locations database")
-    @hermithash = YAML.load(File.open("configs/hermithash.yaml"))
+    File.open("configs/hermithash.yaml") {|fi| @hermithash = YAML.load(fi)}
     trigger /card(\d+)\s+a tarot card inscribed with the Hermit/, :set_value
     trigger /You take the Hermit tarot and rub it vigorously on the ground/, :save_hash
     trigger /^The card begins to glow with a mystic energy/, :hermit_drop
@@ -25,7 +25,7 @@ module Hermittracker
       send_kmuddy_command("outd hermit")
       send_kmuddy_command("ii hermit")
       @key = key
-      warn("Associating card @whichhermit with the place name @key")
+      warn("Associating card #{@whichhermit} with the place name #{@key}")
       @hermithash[key] = @whichhermit
       send_kmuddy_command("activate hermit")
     end
@@ -36,7 +36,7 @@ module Hermittracker
   end
   
   def save_hash
-    File.open("configs/hermithash.yaml", "w") {|f| YAML.dump(@hermithash, f)}
+    File.open("configs/hermithash.yaml", "w") {|fi| YAML.dump(@hermithash, fi)}
     warn("Saved hermit tracker hash")
   end
   
@@ -44,7 +44,7 @@ module Hermittracker
     if key == ''
       warn("Come now, you have to tell me where to go! Specify a hermit to fling!")
     else
-      send_kmuddy_command("get @hermithash[key] from pack")
+      send_kmuddy_command("get #{@hermithash[key]} from pack")
       send_kmuddy_command("charge hermit")
       @charginghermit = true
     end
@@ -58,7 +58,7 @@ module Hermittracker
     if @charginghermit
       send_kmuddy_command("fling hermit at ground")
       @charginghermit = false
-      @hermithash.delete("@key")
+      @hermithash.delete(@key.to_s)
     end
   end
 end
