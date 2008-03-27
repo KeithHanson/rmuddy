@@ -1,6 +1,6 @@
 #Module for tracking where you have charged Hermit tarot cards in achaea
-#USAGE: /notify 4567 Hermittracker activate_hermit <tag to associate room with>
-#       /notify 4567 Hermittracker fling_hermit <room-tag>
+#USAGE: /notify 4567 Hermit activate_hermit <tag to associate room with>
+#       /notify 4567 Hermit fling_hermit <room-tag>
 #The tracker -should- automagically keep track of which card you charged, and 
 #where, and get it from your pack.
 class Hermit < BasePlugin
@@ -9,6 +9,7 @@ class Hermit < BasePlugin
     @whichhermit = ''
     @key = ''
     @charginghermit = false
+    @resethash = {"Location" => "placeholder"}
     warn("Loading hermit locations database")
     File.open("configs/hermithash.yaml") {|fi| @hermithash = YAML.load(fi)}
     trigger /card(\d+)\s+a tarot card inscribed with the Hermit/, :set_value
@@ -18,7 +19,7 @@ class Hermit < BasePlugin
     warn("Hermit Tracker loaded")
   end
   
-  def activate_hermit(key)
+  def activate_hermit(key = '')
     if key == ''
       warn("Rmuddy: You must supply a word to associate this room with!!")
     else
@@ -46,7 +47,8 @@ class Hermit < BasePlugin
     warn("Saved hermit tracker hash")
   end
   
-  def fling_hermit(key)
+  def fling_hermit(key = '')
+    @key = key
     if key == ''
       warn("Come now, you have to tell me where to go! Specify a hermit to fling!")
     else
@@ -61,8 +63,10 @@ class Hermit < BasePlugin
     @hermithash.each_key { |key| warn("Rmuddy: #{key}") }
   end
   
-  def test_this
-    warn("Rmuddy: TESTING!!!!!")
+  def reset_hash
+    warn("Rmuddy: Resetting hermit database... all hermit location is now kaput")
+    @hermithash = @resethash
+    save_hash
   end
   
   def hermit_drop
