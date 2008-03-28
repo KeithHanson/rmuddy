@@ -99,12 +99,12 @@ class Ratter < BasePlugin
   end
 
   def enable_ratter
-    warn("RMuddy: Room Ratter Turned On.")
+    warn("Room Ratter Turned On.")
     @ratter_enabled = true
   end
 
   def disable_ratter
-    warn("RMuddy: Room Ratter Turned Off.")
+    warn("Room Ratter Turned Off.")
     @ratter_enabled = false
   end
 

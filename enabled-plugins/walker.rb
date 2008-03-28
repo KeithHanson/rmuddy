@@ -9,8 +9,8 @@ class Walker < BasePlugin
   attr_accessor :back_tracking
 
   def setup
-    warn("RMuddy: ***The Auto Walker will fully automate your ratting and is considered ILLEGAL by Achaea.***")
-    warn("RMuddy: ***Use at your own risk!***")
+    warn("***The Auto Walker will fully automate your ratting and is considered ILLEGAL by Achaea.***")
+    warn("***Use at your own risk!***")
  
     #When we backtrack along the rail, we'll need these.
     @opposite_directions = { "n" => "s", "s" => "n", "e" => "w", "w" => "e", "ne" => "sw", "sw" => "ne", "nw" => "se", "se" => "nw", "in" => "out", "out" => "in", "u" => "d", "d" => "u"} 
@@ -98,14 +98,14 @@ class Walker < BasePlugin
   end
 
   def enable_walker
-    warn("RMuddy: Auto Walker turned on. (Used with the Room Ratter.)")
+    warn("Auto Walker turned on. (Used with the Room Ratter.)")
     @auto_walk_enabled = true
 
     reset_rail_timer
   end
 
   def disable_walker
-    warn("RMuddy: Auto Walker turned off. (Used with the Room Ratter.)")
+    warn("Auto Walker turned off. (Used with the Room Ratter.)")
     @auto_walk_enabled = false
     kill_thread
     @backtracking = true
@@ -122,8 +122,10 @@ class Walker < BasePlugin
   end
   def misguided
     @lost_or_not += 1
-    if @lost_or_not < 3
+    if @lost_or_not = 1
       @rail_position -= 2
+    elsif @lost_or_not <3
+      @rail_position -= 1
     else
       lost!
     end
@@ -132,13 +134,13 @@ class Walker < BasePlugin
 
   def lost!
     if @auto_walk_enabled == true
-      warn("RMuddy: Auto Walker is LOST! Disabling.")
+      warn("Auto Walker is LOST! Disabling.")
       @auto_walk_enabled = false
     end
   end
 
   def increment_rail_position
-
+    @lost_or_not = 0
     if plugins[Ratter].ratter_enabled && @auto_walk_enabled
       if @rail_position + 1 < @ratter_rail[@current_rail].length
         @rail_position += 1 
