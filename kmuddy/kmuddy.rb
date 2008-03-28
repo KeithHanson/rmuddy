@@ -1,5 +1,5 @@
 #!/bin/env ruby
-
+#Modified for use with RMuddy specifically by Demonnic. 
 require 'socket'
 
 module KMuddy
@@ -34,7 +34,7 @@ module KMuddy
    end
 
    def warn(text)
-      $stderr.puts("\n-! #{text}")
+      $stderr.puts("\n-!RMuddy: #{text}")
    end
 
    def output(text)

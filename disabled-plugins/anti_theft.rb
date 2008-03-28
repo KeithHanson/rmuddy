@@ -8,7 +8,24 @@ class Anti_theft < BasePlugin
     trigger /You get \d+ gold sovereigns from \w+/, :put_gold_away
     trigger /^You remove a canvas backpack/, :rewear_pack
     trigger /^You remove a suit of scale mail/, :rewear_armor
-    File.open("configs/anti_theft.yaml") {|fi| @thefthash = YAML.load(fi)}
+    
+    unless (File.open("configs/anti_theft.yaml") {|fi| @thefthash = YAML.load(fi)}) 
+      warn("RMuddy: No configuration file found... you must have the configuration file anti_theft.yaml in the configs directory")
+    end
+  end
+  
+  def help
+    warn("RMuddy: OK, you asked for it. You must setup the YAML file. It has a format. Each thing should be on a seperate line")
+    warn("RMuddy: The format is... on separate lines, mind you, with nothing in front of it")
+    warn("item: \"<fully described item, with number here>\"")
+    blank_line
+    warn("RMuddy: example:")
+    warn("RMuddy: pack: \"pack296008\"")
+    blank_line
+    warn("RMuddy: You can use \"/notify 4567 Antitheft set_pack pack296008\" to accomplish the same result as the line above")
+    warn("RMuddy: and this module should have been packaged with a template anti_theft.yaml file with it")
+    blank_line
+    warn("RMuddy:")
   end
 end
 

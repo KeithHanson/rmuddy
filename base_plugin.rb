@@ -6,6 +6,10 @@ class BasePlugin
 
     self.setup
   end
+  
+  def bar_line
+    warn("=" * 80)
+  end
 
   def plugins
     @receiver.plugins
@@ -28,11 +32,11 @@ class BasePlugin
       @receiver.disabled_plugins.delete(self)
       @receiver.enabled_plugins << self
     end
-    warn("RMuddy: #{self.class.to_s} Plugin has been enabled.")
+    warn("#{self.class.to_s} Plugin has been enabled.")
   end
 
   def help
-    warn("RMuddy: That plugin's author has not created a help for you!")
+    warn("That plugin's author has not created a help for you!")
   end
 
   def trigger(regex, method)
@@ -43,7 +47,9 @@ class BasePlugin
   def set_kmuddy_variable(variable_name, variable_value)
     @receiver.queue << ["set_var", variable_name, variable_value]
   end
-  
+  def blank_line
+    warn("")
+  end
   def get_kmuddy_variable(variable_name)
     @receiver.varsock.get(variable_name)
   end
