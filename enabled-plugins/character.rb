@@ -48,8 +48,14 @@ class Character < BasePlugin
     unless @using_extended_stats == true
       @current_health = match_object[1].to_i
       @current_mana = match_object[2].to_i
-      @balanced = match_object[3].include("x")
+      @balanced = match_object[3].include?("x")
       @has_equilibrium = match_object[3].include?("e")
+      #Because it will be helpful to keep using is_balanced and gained_equilibrium
+      if match_object[3].include?("x")
+        is_balanced
+      elsif match_object[3].include?("e")
+        gained_equilibrium
+      end
 
       debug("Character: Loaded Current Stats")
       debug("Character: Sending Current Stats")

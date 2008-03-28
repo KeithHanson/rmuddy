@@ -6,11 +6,7 @@ class BasePlugin
 
     self.setup
   end
-  
-  def bar_line
-    warn("=" * 80)
-  end
-
+    
   def plugins
     @receiver.plugins
   end
@@ -24,7 +20,7 @@ class BasePlugin
       @receiver.enabled_plugins.delete(self)
       @receiver.disabled_plugins << self
     end
-    warn("RMuddy: #{self.class.to_s} Plugin has been disabled.")
+    warn("#{self.class.to_s} Plugin has been disabled.")
   end
 
   def enable
@@ -47,9 +43,7 @@ class BasePlugin
   def set_kmuddy_variable(variable_name, variable_value)
     @receiver.queue << ["set_var", variable_name, variable_value]
   end
-  def blank_line
-    warn("")
-  end
+  
   def get_kmuddy_variable(variable_name)
     @receiver.varsock.get(variable_name)
   end

@@ -48,7 +48,7 @@ class Hermit < BasePlugin
   
   def save_hash
     File.open("configs/hermithash.yaml", "w") {|fi| YAML.dump(@hermithash, fi)}
-    warn(" Saved hermit tracker hash")
+    warn("Saved hermit tracker hash")
   end
   
   def fling_hermit(key = '')
@@ -80,11 +80,11 @@ class Hermit < BasePlugin
   
   def hermit_list
     warn("Hermits currently in database")
-    @output = " Location".ljust(@formatpad) + @hermithash["Location"].rjust(@formatpad)
+    @output = "Location".ljust(@formatpad) + @hermithash["Location"].rjust(@formatpad)
     warn(@output)
     @hermithash.each_key { |key| 
      unless key == "Location" 
-       @output = " #{key.to_s}".ljust(@formatpad) + @hermithash[key].to_s.rjust(@formatpad)
+       @output = "#{key.to_s}".ljust(@formatpad) + @hermithash[key].to_s.rjust(@formatpad)
        warn(@output)
      end
     }
