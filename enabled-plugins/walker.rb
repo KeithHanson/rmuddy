@@ -60,7 +60,7 @@ class Walker < BasePlugin
     trigger /The Crossroads\./, :skip_room
     trigger /is here\./, :skip_room
 
-    trigger /There is no exit in that direction/, :misguided
+    trigger /There is no exit in that direction/, :lost!
     
     #After doing any thing that would cause us to do something to a rat, reset the timers.
     after Ratter, :should_i_attack_rat?, :reset_rail_timer
@@ -120,16 +120,17 @@ class Walker < BasePlugin
       send_kmuddy_command("#{@ratter_rail[@current_rail][@rail_position + 1]}")
     end
   end
-  def misguided
-    @lost_or_not += 1
-    if @lost_or_not = 1
-      @rail_position -= 2
-    elsif @lost_or_not <3
-      @rail_position -= 1
-    else
-      lost!
-    end
-  end
+  
+  #def misguided
+  # @lost_or_not += 1
+  # if @lost_or_not == 1
+  #   @rail_position -= 2
+  # elsif @lost_or_not <3
+  #   @rail_position -= 1
+  # else
+  #   lost!
+  # end
+  # end
 
 
   def lost!
