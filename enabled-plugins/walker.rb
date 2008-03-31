@@ -72,6 +72,7 @@ class Walker < BasePlugin
     #This mother thread keeps track of the sub thread that does the timing.
     Thread.new do 
       while true do
+        sleep 0.03
 
         if @auto_walk_enabled
 
@@ -172,7 +173,7 @@ class Walker < BasePlugin
       end
       if @rail_position > 0
         @rail_position -= 1
-        sleep 0.3
+        sleep 0.5
         send_kmuddy_command("#{@opposite_directions[@ratter_rail[@current_rail][@rail_position]]}")
       else
         @backtracking = false
