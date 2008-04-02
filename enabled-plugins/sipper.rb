@@ -27,8 +27,8 @@ class Sipper < BasePlugin
     @sipper_enabled = true
 
     #Our health and mana thresholds
-    @health_threshold_percentage = 70
-    @mana_threshold_percentage = 70
+    @health_threshold_percentage = 50
+    @mana_threshold_percentage = 40
     
     #After every time the character's current stats are updated, we check to see if we should sip.
     after Character, :set_simple_stats, :should_i_sip?

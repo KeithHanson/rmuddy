@@ -75,6 +75,7 @@ class Hermit < BasePlugin
     else
       warn("deleting #{key} from the hermit locations database")
       @hermithash.delete(key.to_s)
+      save_hash
     end
   end
   

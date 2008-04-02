@@ -47,15 +47,24 @@ class Ratter < BasePlugin
     trigger /An*\s*\w* rat wanders back into its warren where you may not follow./, :rat_is_unavailable
     trigger /With a flick of its small whiskers, an*\s*\w* rat dashes out of view./, :rat_is_unavailable
     trigger /An*\s*\w* rat darts into the shadows and disappears./, :rat_is_unavailable
+    
+    #Identify when there WAS a rat, but there no longer is cuz someone else using RMuddy ninja'd it
+    trigger /I do not recognise anything called that here./, :no_rats!
+    trigger /Ahh, I am truly sorry, but I do not see anyone by that name here./, :no_rats!
+    trigger /Nothing can be seen here by that name./, :no_rats!
+    trigger /You detect nothing here by that name./, :no_rats!
+    trigger /You cannot see that being here./, :no_rats!
 
     #disable and enable the scripts with "rats" in the mud.
     trigger /You will now notice the movement of rats\. Happy hunting\!/, :enable_ratter
     trigger /You will no longer take notice of the movement of rats\./, :disable_ratter
     
     #sell your rats when you come into the room Liirup is in!
-    trigger /Liirup the Placid stands here/, :sell_rats
-    #Reset the money after selling to the ratter in hashan.
+    trigger /Liirup the Placid stands here/, :sell_rats_hashan
+    trigger /The Ratman stands here quietly/, :sell_rats_ashtan
+    #Reset the money after selling to the ratter in hashan. .. Or Ashtan, now
     trigger /Liirup squeals with delight/, :reset_money
+    trigger /The ratman thanks you as you hand over/, :reset_money
 
     trigger /You see exits/, :reset_available_rats
     trigger /You see a single exit/, :reset_available_rats
@@ -67,6 +76,12 @@ class Ratter < BasePlugin
 
   def ratter_enabled?
     @ratter_enabled
+  end
+  
+  def self_rats_ashtan
+    if @ratter_enabled
+      send_kmuddy_command("Sell rats to Ratman")
+    end
   end
 
   def rat_available?
@@ -97,6 +112,10 @@ class Ratter < BasePlugin
     set_kmuddy_variable("current_rat_count", @inventory_rats)
     set_kmuddy_variable("total_rat_money", @total_rat_money)
   end
+  
+  def no_rats!
+    @available_rats = 0
+  end
 
   def enable_ratter
     warn("Room Ratter Turned On.")
@@ -123,8 +142,8 @@ class Ratter < BasePlugin
   def reset_available_rats
     @available_rats = 0
   end
-
-  def sell_rats
+  
+  def sell_rats_hashan
     if @ratter_enabled
       send_kmuddy_command("Sell rats to Liirup")
     end
