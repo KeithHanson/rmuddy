@@ -1,13 +1,11 @@
 ---
-journal: ""
-trousers: "leggings286549"
-armor: "scalemail88722"
-weapon1: ""
-weapon2: ""
+hat: "hat157159"
+trousers: "trousers49175"
 shield: "shield70653"
-robe: "robes290768"
-shirt: "shirt286549"
-ring1: ""
-ring2: ""
-pack: "pack296008"
-shoes: "sandals167956"
+shirt: "shirt31980"
+pack: "pack97401"
+shoes: "boots125965"
+mask: "mask337070"
+armor: "scalemail265529"
+balance_items: 
+  - armor

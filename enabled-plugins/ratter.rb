@@ -17,10 +17,10 @@ class Ratter < BasePlugin
     @ratter_enabled = false
 
     #This determines if we're a balance user or an equilibrium user...
-    @balance_user = false
+    @balance_user = true
     
     #What do we do when we want them dead?
-    @attack_command = "warp rat"
+    @attack_command = "bop rat"
 
     #Set the current room's rats to 0
     @available_rats = 0

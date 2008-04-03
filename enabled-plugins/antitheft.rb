@@ -7,6 +7,7 @@ class Antitheft < BasePlugin
     #by default, we do in fact want anti_theft
     
     @anti_theft = true
+    @trigger_setup = false
     
     #Setup your anti-theft triggers here... they might be different for you than me
     
@@ -17,38 +18,106 @@ class Antitheft < BasePlugin
     #protect your cash!
     trigger /You get \d+ gold sovereigns from \w+/, :put_gold_away
     
-    #and rewear/wield things
-    trigger /^You remove a canvas backpack/, :rewear_pack
-    trigger /^You remove a suit of scale mail/, :rewear_armor
-    trigger /^You remove flowing violet robes./, :rewear_robe
-    trigger /^You remove a flowing blue shirt./, :rewear_shirt
-    trigger /^You remove tan coloured leggings./, :rewear_trousers
-    trigger /^You remove a simple pair of wooden sandals/, :rewear_shoes
-    trigger /You cease wielding a cavalry shield in your \w+ hand/, :rewear_shield
-    trigger /You drop a cavalry shield./, :pickup_shield
-    
-    #triggers so you know you put the stuff on
-    trigger /You begin to wield a cavalry shield in your left hand/, :reset_shield
-    trigger /You are now wearing tan coloured leggings./, :reset_trousers
-    trigger /You are now wearing a flowing blue shirt./, :reset_shirt
-    trigger /You are now wearing a suit of scale mail./, :reset_armor
-    trigger /You are now wearing flowing violet robes./, :reset_robe
-    trigger /You are now wearing a canvas backpack./, :reset_pack
-    trigger /You are now wearing a simple pair of wooden sandals./, :reset_shoe
-    
-    #After we gain balance, check if we need to rewear something!
-    after Character, :is_balanced, :rewear?
-    
     #load the theft database
-    unless (File.open("configs/antitheft.yaml") {|fi| @thefthash = YAML.load(fi)}) 
+    unless (File.open("configs/antitheft.yaml") {|file| @thefthash = YAML.load(file)}) 
       warn("No configuration file found... you must have the configuration file")
       warn("antitheft.yaml in the configs directory")
     end
+
+    #These are the items from the configuration that will require balance, and so
+    #the methods get defined a bit differently.
+    @balance_items = []
+
+    #If an item in the hash is found with the key: "balance_items", delete it off the main hash
+    #and stuff it into it's own variable.
+    if @thefthash.keys.include?("balance_items")
+      @balance_items = @thefthash.delete("balance_items")
+    end
+
     #here, we'll push a bunch of variables out to kmuddy
     @thefthash.each_key {|key| set_kmuddy_variable("theft_#{key}", @thefthash[key])}
+
+    #This is the auto-setup. We basically trigger off of an ii
+    trigger /^You are wearing:/, :enable_trigger_setup
+    
+    #Now, we know we'll only get wearable items. 
+    #We'll need to setup for wielding as well.
+    trigger /^\s*(\w*)\s*(.*)$/, :setup_trigger
+
+    #I left this manual trigger in just so I'll remember to handle it a bit later
+    #We want to be able to dynamically do this though.
+    trigger /You drop a cavalry shield./, :pickup_shield
+    
+    #After we gain balance, check if we need to rewear something!
+    after Character, :is_balanced, :rewear?
+
+    #Once we see a character's prompt, stop collecting and creating triggers.
+    after Character, :set_extended_stats, :disable_trigger_setup
+    after Character, :set_simple_stats, :disable_trigger_setup
+
+    #For some reason, our send_kmuddy_commands aren't working in a setup method. *FEH!*
+    #I use this as a one time variable to call a setup method.
+    @needs_setup = true
   end
   
-  def hypnosis (match_object )
+  
+
+  def enable_trigger_setup
+    @trigger_setup = true
+  end
+
+  def disable_trigger_setup
+    #Fire off an ii if we haven't already.
+    if @needs_setup == true
+      @needs_setup = false
+      send_kmuddy_command("ii")
+      send_kmuddy_command("more")
+    else
+      #otherwise, disable the trigger setups
+      @trigger_setup = false
+    end
+  end
+
+  #The Magic!
+  def setup_trigger(match_object)
+    #If we're setting up triggers (after an ii), do the following...
+    if @trigger_setup
+
+      #Move through each key/value pair in thefthash
+      @thefthash.each_pair do |key, value|
+        #if the value equals the matched object in ii...
+        if value == match_object[1]
+          #we create rewear/reset method names...
+          rewear_method_string = "rewear_#{key}"
+          reset_method_string = "reset_#{key}"
+
+          #Make sure we haven't already defined these methods... they really only need to be defined once.
+          unless self.methods.include?(rewear_method_string)
+
+            #Check to see if this is a balance required item... If not...
+            unless @balance_items.include?(key)
+              #eval the string of the method. Basically, this unreadable mess sets the @keybalance instance var to true,
+              #and sends kmuddy the command to rewear.
+              eval("def #{rewear_method_string}\n if @anti_theft\n@#{key}balance = true\n send_kmuddy_command(\"wear #{value}\")\n end\nend")
+            else
+              #If this is a balance item, we simple set the balance to true, and wait for our balanced
+              #trigger to fire.
+              eval("def #{rewear_method_string}\n if @anti_theft\n@#{key}balance = true\n end\nend")
+            end
+            #all items have a reset method.
+            eval("def #{reset_method_string}\n@#{key}balance = false\nend")
+  
+            #all items will have the same triggers
+            trigger Regexp.new("You remove #{match_object[2]}"),  rewear_method_string.to_sym
+            trigger Regexp.new("You are now wearing #{match_object[2]}"), reset_method_string.to_sym
+          end
+        end
+      end
+    end
+  end
+  
+
+  def hypnosis (match_object)
     if @anti_theft
       send_kmuddy_command("lose #{match_object[1]}")
       send_kmuddy_command("/echo OK! YOU MAY BE GETTING STOLEN FROM!")
@@ -77,54 +146,6 @@ class Antitheft < BasePlugin
     warn("Antitheft save_hash")
   end
   
-  def rewear_pack
-    if @anti_theft
-      @packbalance = true
-      send_kmuddy_command("wear #{@thefthash["pack"]}")
-    end
-  end
-  def rewear_shoes
-    if @anti_theft
-      @shoebalance = true
-      send_kmuddy_command("wear #{@thefthash["shoes"]}")
-    end
-  end
-  
-  def rewear_shield
-    if @anti_theft
-      @shieldbalance = true
-      send_kmuddy_command("wear #{@thefthash["shield"]}")
-    end
-  end
-  
-  def reset_shield
-    @shieldbalance = false
-  end
-  
-  def reset_trousers
-    @trouserbalance = false
-  end
-  
-  def reset_shirt
-    @shirtbalance = false
-  end
-  
-  def reset_armor
-    @armorbalance = false      
-  end
-  
-  def reset_robe
-    @robebalance = false
-  end
-  
-  def reset_pack
-    @packbalance = false
-  end
-  
-  def reset_shoe
-    @shoebalance = false
-  end
-  
   def pickup_shield
     if @anti_theft
       send_kmuddy_command("Get #{@thefthash["shield"]}")
@@ -132,69 +153,28 @@ class Antitheft < BasePlugin
       @shieldbalance = true
     end
   end
-  
-  def rewear_shirt
-    if @anti_theft
-      @shirtbalance = true
-      send_kmuddy_command("wear #{@thefthash["shirt"]}")
-    end
-  end
-  
-  def rewear_trousers
-    if @anti_theft
-      @trouserbalance = true
-      send_kmuddy_command("wear #{@thefthash["trousers"]}")
-    end
-  end
-  
-  def rewear_armor
-    if @anti_theft
-      @armorbalance = true
-      send_kmuddy_command("wear #{@thefthash["armor"]}")
-    end
-  end
-  
-  def rewear_robe
-    if @anti_theft
-      @robebalance = true
-      send_kmuddy_command("wear #{@thefthash["robe"]}")
-    end
-  end
-  
+ 
   def rewear?
     
+    #Manually check for the soulmaster, try and lose him
     if @soulmaster
       send_kmuddy_command("lose soulmaster")
       @soulmaster = false
-        
-    elsif @packbalance
-      send_kmuddy_command("wear #{@thefthash["pack"]}")
-      @packbalance = false
-        
-    elsif @armorbalance
-      send_kmuddy_command("wear #{@thefthash["armor"]}")
-      @armorbalance = false
-      
-    elsif @shieldbalance
-      send_kmuddy_command("wear #{@thefthash["shield"]}")
-      @shieldbalance = false
-        
-    elsif @shoebalance
-      send_kmuddy_command("wear #{@thefthash["shoes"]}")
-        
-    elsif @shirtbalance
-      send_kmuddy_command("wear #{@thefthash["shirt"]}")
-      @shirtbalance = false
-        
-    elsif @trouserbalance
-      send_kmuddy_command("wear #{@thefthash["trousers"]}")
-      @trouserbalance = false
-      
-    elsif @robebalance
-      send_kmuddy_command("wear #{@thefthash["robe"]}")
-      @robebalance = 0
+      #Stop trying to do anything else after this...
+      return nil
     end
-    
+
+    #Go through each instance variable, and re-wear where needed
+    @thefthash.each_pair do |key, value|
+      #Grab the instance variable and check if it's true...
+      if instance_variable_get("@#{key}balance")
+        #if so... rewear and set the instance variable to false
+        send_kmuddy_command("wear #{value}")
+        instance_variable_set("@#{key}balance", false)
+        #stop the procession of checking and wait until we regain balance again.
+        return nil 
+      end
+    end
   end
   
   def print_hash
