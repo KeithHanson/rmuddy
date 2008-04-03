@@ -17,6 +17,5 @@ receiver = Receiver.new()
 
 debug("Starting Connection Handler")
 connection_handler = ConnectionHandler.new(receiver)
-
 connection_handler.start
 debug("Connection Handler Started")

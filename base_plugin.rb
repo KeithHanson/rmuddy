@@ -70,5 +70,39 @@ class BasePlugin
     
     module_name.module_eval(new_method.join("\n"))
   end
+  
+  #Use this in your timer blocks... this should be interesting.
+  def simple_timer (time_to_wait, method)
+    Thread.new do 
+      sleep time_to_wait #this will be in seconds, though fractions will do
+      self.send(method.to_sym)
+    end
+  end
+
+  #Method to allow sending a command to another plugin.
+  def plugin_timer(time_to_wait, plugin, method)
+    Thread.new do
+      sleep time_to_wait
+      if plugin.class?(Class)
+        plugins[plugin].send(method.to_sym)
+      else
+        plugin.send(method.to_sym)
+      end
+    end
+  end
+
+  #this one repeats every time_to_wait seconds
+  def time_block
+    start_time = Time.now
+    Thread.new { yield }
+    Time.now - start_time
+  end
+
+  def heartbeat(time_to_wait)
+    while true do
+      time_spent = time_block { yield }
+      sleep(time_to_wait - time_spent) if time_spent < time_to_wait
+    end
+  end
 
 end

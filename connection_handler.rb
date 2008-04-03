@@ -1,6 +1,6 @@
-require File.join(File.dirname(__FILE__), "kmuddy", 'kmuddy.rb')
-require File.join(File.dirname(__FILE__), "kmuddy", 'eventserver.rb')
-require File.join(File.dirname(__FILE__), "kmuddy", 'variablesock.rb')
+require File.join(File.dirname(__FILE__), "lib", 'kmuddy.rb')
+require File.join(File.dirname(__FILE__), "lib", 'eventserver.rb')
+require File.join(File.dirname(__FILE__), "lib", 'variablesock.rb')
 
 include KMuddy
 
