@@ -65,6 +65,8 @@ class Ratter < BasePlugin
     #Reset the money after selling to the ratter in hashan. .. Or Ashtan, now
     trigger /Liirup squeals with delight/, :reset_money
     trigger /The ratman thanks you as you hand over/, :reset_money
+    trigger /Although you exert extraordinary effort, you find you lack the mental reserves to perform that ability./, :out_of_mana!
+    trigger /You cannot summon up the willpower to perform such a mentally exhausting task./, :out_of_willpower!
 
     trigger /You see exits/, :reset_available_rats
     trigger /You see a single exit/, :reset_available_rats
@@ -78,7 +80,19 @@ class Ratter < BasePlugin
     @ratter_enabled
   end
   
-  def self_rats_ashtan
+  def out_of_mana!
+    if !@balance_user
+      disable_ratter
+    end
+  end
+  
+  def out_of_willpower!
+    if !@balance_user
+      disable_ratter
+    end
+  end
+  
+  def sell_rats_ashtan
     if @ratter_enabled
       send_kmuddy_command("Sell rats to Ratman")
     end

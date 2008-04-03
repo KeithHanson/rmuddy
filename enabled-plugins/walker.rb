@@ -59,6 +59,7 @@ class Walker < BasePlugin
     #It also tries to skip places with people in them...
     trigger /The Crossroads\./, :skip_room
     trigger /is here\./, :skip_room
+    trigger /is here, shrouded\./, :skip_room
 
     trigger /There is no exit in that direction/, :lost!
     
