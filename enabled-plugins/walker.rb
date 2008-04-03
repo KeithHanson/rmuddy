@@ -9,8 +9,8 @@ class Walker < BasePlugin
   attr_accessor :back_tracking
 
   def setup
-    warn("RMuddy: ***The Auto Walker will fully automate your ratting and is considered ILLEGAL by Achaea.***")
-    warn("RMuddy: ***Use at your own risk!***")
+    warn("***The Auto Walker will fully automate your ratting and is considered ILLEGAL by Achaea.***")
+    warn("***Use at your own risk!***")
  
     #When we backtrack along the rail, we'll need these.
     @opposite_directions = { "n" => "s", "s" => "n", "e" => "w", "w" => "e", "ne" => "sw", "sw" => "ne", "nw" => "se", "se" => "nw", "in" => "out", "out" => "in", "u" => "d", "d" => "u"} 
@@ -59,8 +59,9 @@ class Walker < BasePlugin
     #It also tries to skip places with people in them...
     trigger /The Crossroads\./, :skip_room
     trigger /is here\./, :skip_room
+    trigger /is here, (shrouded|hidden)\./, :skip_room
 
-    trigger /There is no exit in that direction/, :misguided
+    trigger /There is no exit in that direction/, :lost!
     
     #After doing any thing that would cause us to do something to a rat, reset the timers.
     after Ratter, :should_i_attack_rat?, :reset_rail_timer
@@ -72,6 +73,7 @@ class Walker < BasePlugin
     #This mother thread keeps track of the sub thread that does the timing.
     Thread.new do 
       while true do
+        sleep 0.03
 
         if @auto_walk_enabled
 
@@ -98,14 +100,28 @@ class Walker < BasePlugin
   end
 
   def enable_walker
-    warn("RMuddy: Auto Walker turned on. (Used with the Room Ratter.)")
+    warn("Auto Walker turned on. (Used with the Room Ratter.)")
     @auto_walk_enabled = true
 
     reset_rail_timer
   end
+  
+  def ashtan_rail
+    @ratter_rail = [
+                      %w(e e e ne e se se s sw se se e e e e se se s s s sw sw w nw nw sw sw nw n nw w w n nw nw n n n w w),
+                      %w(w s s se s se se e s s s w s s s se se ne e e se se s se se sw sw nw n nw nw nw ne e e n n ne ne se se e ne se e e ne n n nw nw sw w nw nw sw sw nw n nw w w sw s s s w nw w n ne n ne nw n nw n n e)
+                         ]
+  end
+  
+  def hashan_rail
+    @ratter_rail = [
+                      %w(n n ne e n e ne e n ne e se e ne se ne n n e ne e n ne e se se e s s sw s s w sw nw w w sw w w nw w s s sw s s s sw w w w s w w nw sw nw nw n n),
+                      %w(n n ne e n e ne e n nw w nw sw nw n n ne se e ne e se ne n e e s se s s s se s s s s sw s s s sw w w w s w w nw sw nw nw n n)
+                         ]
+  end
 
   def disable_walker
-    warn("RMuddy: Auto Walker turned off. (Used with the Room Ratter.)")
+    warn("Auto Walker turned off. (Used with the Room Ratter.)")
     @auto_walk_enabled = false
     kill_thread
     @backtracking = true
@@ -115,30 +131,33 @@ class Walker < BasePlugin
     end
   end
 
-  def skip_room
+  def skip_room (match_object = [])
     if @auto_walk_enabled
       send_kmuddy_command("#{@ratter_rail[@current_rail][@rail_position + 1]}")
     end
   end
-  def misguided
-    @lost_or_not += 1
-    if @lost_or_not < 3
-      @rail_position -= 2
-    else
-      lost!
-    end
-  end
+  
+  #def misguided
+  # @lost_or_not += 1
+  # if @lost_or_not == 1
+  #   @rail_position -= 2
+  # elsif @lost_or_not <3
+  #   @rail_position -= 1
+  # else
+  #   lost!
+  # end
+  # end
 
 
   def lost!
     if @auto_walk_enabled == true
-      warn("RMuddy: Auto Walker is LOST! Disabling.")
+      warn("Auto Walker is LOST! Disabling.")
       @auto_walk_enabled = false
     end
   end
 
   def increment_rail_position
-
+    @lost_or_not = 0
     if plugins[Ratter].ratter_enabled && @auto_walk_enabled
       if @rail_position + 1 < @ratter_rail[@current_rail].length
         @rail_position += 1 
@@ -169,7 +188,7 @@ class Walker < BasePlugin
       end
       if @rail_position > 0
         @rail_position -= 1
-        sleep 0.3
+        sleep 0.5
         send_kmuddy_command("#{@opposite_directions[@ratter_rail[@current_rail][@rail_position]]}")
       else
         @backtracking = false

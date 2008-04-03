@@ -17,10 +17,10 @@ class Ratter < BasePlugin
     @ratter_enabled = false
 
     #This determines if we're a balance user or an equilibrium user...
-    @balance_user = true
+    @balance_user = false
     
     #What do we do when we want them dead?
-    @attack_command = "bop rat"
+    @attack_command = "warp rat"
 
     #Set the current room's rats to 0
     @available_rats = 0
@@ -47,15 +47,29 @@ class Ratter < BasePlugin
     trigger /An*\s*\w* rat wanders back into its warren where you may not follow./, :rat_is_unavailable
     trigger /With a flick of its small whiskers, an*\s*\w* rat dashes out of view./, :rat_is_unavailable
     trigger /An*\s*\w* rat darts into the shadows and disappears./, :rat_is_unavailable
+    
+    #Identify when there WAS a rat, but there no longer is cuz someone else using RMuddy ninja'd it
+    trigger /I do not recognise anything called that here./, :no_rats!
+    trigger /Ahh, I am truly sorry, but I do not see anyone by that name here./, :no_rats!
+    trigger /Nothing can be seen here by that name./, :no_rats!
+    trigger /You detect nothing here by that name./, :no_rats!
+    trigger /You cannot see that being here./, :no_rats!
+    
+    #So, you walked away and your character fell asleep.. that's cool, he'll wake up eventually... but not standup
+    trigger /You must be standing first/, :standup
 
     #disable and enable the scripts with "rats" in the mud.
     trigger /You will now notice the movement of rats\. Happy hunting\!/, :enable_ratter
     trigger /You will no longer take notice of the movement of rats\./, :disable_ratter
     
     #sell your rats when you come into the room Liirup is in!
-    trigger /Liirup the Placid stands here/, :sell_rats
-    #Reset the money after selling to the ratter in hashan.
+    trigger /Liirup the Placid stands here/, :sell_rats_hashan
+    trigger /The Ratman stands here quietly/, :sell_rats_ashtan
+    #Reset the money after selling to the ratter in hashan. .. Or Ashtan, now
     trigger /Liirup squeals with delight/, :reset_money
+    trigger /The ratman thanks you as you hand over/, :reset_money
+    trigger /Although you exert extraordinary effort, you find you lack the mental reserves to perform that ability./, :out_of_mana!
+    trigger /You cannot summon up the willpower to perform such a mentally exhausting task./, :out_of_willpower!
 
     trigger /You see exits/, :reset_available_rats
     trigger /You see a single exit/, :reset_available_rats
@@ -67,6 +81,24 @@ class Ratter < BasePlugin
 
   def ratter_enabled?
     @ratter_enabled
+  end
+  
+  def out_of_mana!
+    if !@balance_user
+      disable_ratter
+    end
+  end
+  
+  def out_of_willpower!
+    if !@balance_user
+      disable_ratter
+    end
+  end
+  
+  def sell_rats_ashtan
+    if @ratter_enabled
+      send_kmuddy_command("Sell rats to Ratman")
+    end
   end
 
   def rat_available?
@@ -97,14 +129,22 @@ class Ratter < BasePlugin
     set_kmuddy_variable("current_rat_count", @inventory_rats)
     set_kmuddy_variable("total_rat_money", @total_rat_money)
   end
+  
+  def standup
+    send_kmuddy_command("stand")
+  end
+  
+  def no_rats!
+    @available_rats = 0
+  end
 
   def enable_ratter
-    warn("RMuddy: Room Ratter Turned On.")
+    warn("Room Ratter Turned On.")
     @ratter_enabled = true
   end
 
   def disable_ratter
-    warn("RMuddy: Room Ratter Turned Off.")
+    warn("Room Ratter Turned Off.")
     @ratter_enabled = false
   end
 
@@ -123,9 +163,11 @@ class Ratter < BasePlugin
   def reset_available_rats
     @available_rats = 0
   end
-
-  def sell_rats
-    send_kmuddy_command("Sell rats to Liirup")
+  
+  def sell_rats_hashan
+    if @ratter_enabled
+      send_kmuddy_command("Sell rats to Liirup")
+    end
   end
   
   #Decide whether or not we should attack a rat and do so if we can.

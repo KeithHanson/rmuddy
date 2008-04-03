@@ -16,7 +16,7 @@ class Receiver
   end
   
   def initialize
-    warn("RMuddy: System Loading...")
+    warn("System Loading...")
     @queue = []
     @enabled_plugins = []
 
@@ -68,7 +68,7 @@ class Receiver
     
     Thread.new do
       while true do
-        sleep 0.01
+        sleep 0.03
         if @queue.length > 0
           element = @queue.shift
           case element[0]
@@ -81,14 +81,18 @@ class Receiver
       end
     end
 
-    warn("=" * 80)
+    bar_line
     warn("You may send commands to RMuddy's plugins like so:")
     warn("/notify 4567 PluginName action_name arg1 arg2 arg3")
-    warn("=" * 80)
+    bar_line
     warn("You may ask a plugin for help by doing:")
     warn("/notify 4567 PluginName help")
+    bar_line
+    warn("System Ready!")
+  end
+  
+  def bar_line
     warn("=" * 80)
-    warn("RMuddy: System Ready!")
   end
 
   def receive(text)

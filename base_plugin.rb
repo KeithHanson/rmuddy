@@ -6,7 +6,7 @@ class BasePlugin
 
     self.setup
   end
-
+    
   def plugins
     @receiver.plugins
   end
@@ -20,7 +20,7 @@ class BasePlugin
       @receiver.enabled_plugins.delete(self)
       @receiver.disabled_plugins << self
     end
-    warn("RMuddy: #{self.class.to_s} Plugin has been disabled.")
+    warn("#{self.class.to_s} Plugin has been disabled.")
   end
 
   def enable
@@ -28,11 +28,11 @@ class BasePlugin
       @receiver.disabled_plugins.delete(self)
       @receiver.enabled_plugins << self
     end
-    warn("RMuddy: #{self.class.to_s} Plugin has been enabled.")
+    warn("#{self.class.to_s} Plugin has been enabled.")
   end
 
   def help
-    warn("RMuddy: That plugin's author has not created a help for you!")
+    warn("That plugin's author has not created a help for you!")
   end
 
   def trigger(regex, method)

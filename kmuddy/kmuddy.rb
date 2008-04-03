@@ -1,5 +1,5 @@
 #!/bin/env ruby
-
+#Modified for use with RMuddy specifically by Demonnic. 
 require 'socket'
 
 module KMuddy
@@ -32,9 +32,16 @@ module KMuddy
       #$stderr.puts("#{ansi("red")}--> #{text}#{ansi("reset")}") if DEBUG
       $stderr.puts("DEBUG--> #{text}") if DEBUG
    end
+   def blank_line
+     warn("")
+   end
+   
+   def bar_line
+     warn("=" * 80)
+   end
 
    def warn(text)
-      $stderr.puts("\n-! #{text}")
+      $stderr.puts("\n-!RMuddy: #{text}")
    end
 
    def output(text)

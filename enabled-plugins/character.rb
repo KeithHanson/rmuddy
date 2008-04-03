@@ -29,11 +29,11 @@ class Character < BasePlugin
     trigger /Endurance:\s*(\d+)\s*\/\s*(\d+)/, :set_total_endurance
     
 
-    #set the balance when it returns.
-    #trigger /^You have recovered balance on all limbs.$/, :is_balanced
+    #set the balance when it returns.(useful for antitheft)
+    trigger /^You have recovered balance on all limbs.$/, :is_balanced
 
-    #demonnic: set the equilibrium when it returns
-    #trigger /^You have recovered equilibrium.$/, :gained_equilibrium
+    #demonnic: set the equilibrium when it returns(useful for some things *tarot*)
+    trigger /^You have recovered equilibrium.$/, :gained_equilibrium
 
     #We use the prompt to tell us when we are unbalanced.
     #trigger /^\d+h, \d+m\se-/, :is_unbalanced
@@ -48,8 +48,14 @@ class Character < BasePlugin
     unless @using_extended_stats == true
       @current_health = match_object[1].to_i
       @current_mana = match_object[2].to_i
-      @balanced = match_object[3].include("x")
+      @balanced = match_object[3].include?("x")
       @has_equilibrium = match_object[3].include?("e")
+      #Because it will be helpful to keep using is_balanced and gained_equilibrium
+      if match_object[3].include?("x")
+        is_balanced
+      elsif match_object[3].include?("e")
+        gained_equilibrium
+      end
 
       debug("Character: Loaded Current Stats")
       debug("Character: Sending Current Stats")
@@ -73,7 +79,11 @@ class Character < BasePlugin
     @current_willpower = match_object[4].to_i
     @balanced = match_object[5].include?("x")
     @has_equilibrium = match_object[5].include?("e")
-
+    if match_object[3].include?("x")
+        is_balanced
+    elsif match_object[3].include?("e")
+        gained_equilibrium
+    end
     debug("Character: Loaded Current Stats")
     debug("Character: Sending Current Stats")
 
