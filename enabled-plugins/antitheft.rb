@@ -15,6 +15,9 @@ class Antitheft < BasePlugin
     trigger /^You remove a canvas backpack/, :rewear_pack
     trigger /^You remove a suit of scale mail/, :rewear_armor
     trigger /^You remove flowing violet robes./, :rewear_robe
+    trigger /^You remove a flowing blue shirt./, :rewear_shirt
+    trigger /^You remove tan coloured leggings./, :rewear_trousers
+    trigger /^You remove a simple pair of wooden sandals../, :rewear_shoes
     
     #After we gain balance, check if we need to rewear something!
     after Character, :is_balanced, :rewear?
@@ -63,6 +66,26 @@ class Antitheft < BasePlugin
       send_kmuddy_command("wear #{@thefthash["pack"]}")
     end
   end
+  def rewear_shoes
+    if @anti_theft
+      @shoebalance = true
+      send_kmuddy_command("wear #{@thefthash["shoes"]}")
+    end
+  end
+  
+  def rewear_shirt
+    if @anti_theft
+      @shirtbalance = true
+      send_kmuddy_command("wear #{@thefthash["shirt"]}")
+    end
+  end
+  
+  def rewear_trousers
+    if @anti_theft
+      @trouserbalance = true
+      send_kmuddy_command("wear #{@thefthash["trousers"]}")
+    end
+  end
   
   def rewear_armor
     if @anti_theft
@@ -80,22 +103,30 @@ class Antitheft < BasePlugin
   
   def rewear?
     
-    if @souldmaster
+    if @soulmaster
       send_kmuddy_command("lose soulmaster")
       @soulmaster = false
-    end
-    
-    if @packbalance
+        
+    elsif @packbalance
       send_kmuddy_command("wear #{@thefthash["pack"]}")
       @packbalance = false
-    end
-    
-    if @armorbalance
+        
+    elsif @armorbalance
       send_kmuddy_command("wear #{@thefthash["armor"]}")
       @armorbalance = false
-    end
-    
-   if @robebalance
+        
+    elsif @shoebalance
+      send_kmuddy_command("wear #{@thefthash["shoes"]}")
+        
+    elsif @shirtbalance
+      send_kmuddy_command("wear #{@thefthash["shirt"]}")
+      @shirtbalance = false
+        
+    elsif @trouserbalance
+      send_kmuddy_command("wear #{@thefthash["trousers"]}")
+      @trouserbalance = false
+      
+    elsif @robebalance
       send_kmuddy_command("wear #{@thefthash["robe"]}")
       @robebalance = 0
     end

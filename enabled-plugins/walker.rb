@@ -59,7 +59,7 @@ class Walker < BasePlugin
     #It also tries to skip places with people in them...
     trigger /The Crossroads\./, :skip_room
     trigger /is here\./, :skip_room
-    trigger /is here, shrouded\./, :skip_room
+    trigger /is here, (shrouded|hidden)\./, :skip_room
 
     trigger /There is no exit in that direction/, :lost!
     
@@ -131,7 +131,7 @@ class Walker < BasePlugin
     end
   end
 
-  def skip_room
+  def skip_room (match_object = [])
     if @auto_walk_enabled
       send_kmuddy_command("#{@ratter_rail[@current_rail][@rail_position + 1]}")
     end

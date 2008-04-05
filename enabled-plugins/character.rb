@@ -29,11 +29,11 @@ class Character < BasePlugin
     trigger /Endurance:\s*(\d+)\s*\/\s*(\d+)/, :set_total_endurance
     
 
-    #set the balance when it returns.
-    #trigger /^You have recovered balance on all limbs.$/, :is_balanced
+    #set the balance when it returns.(useful for antitheft)
+    trigger /^You have recovered balance on all limbs.$/, :is_balanced
 
-    #demonnic: set the equilibrium when it returns
-    #trigger /^You have recovered equilibrium.$/, :gained_equilibrium
+    #demonnic: set the equilibrium when it returns(useful for some things)
+    trigger /^You have recovered equilibrium.$/, :gained_equilibrium
 
     #We use the prompt to tell us when we are unbalanced.
     #trigger /^\d+h, \d+m\se-/, :is_unbalanced
