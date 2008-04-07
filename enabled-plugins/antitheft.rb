@@ -9,15 +9,32 @@ class Antitheft < BasePlugin
     @anti_theft = true
     
     #Setup your anti-theft triggers here... they might be different for you than me
+    
+    #souldmasters and hypnosis triggers
     trigger /^(\w+) snaps his fingers in front of you/, :hypnosis
     trigger /^A soulmaster entity lets loose a horrible scream as a dark stream of primal chaos flows from it and into your very being/, :lose_soulmaster
+    
+    #protect your cash!
     trigger /You get \d+ gold sovereigns from \w+/, :put_gold_away
+    
+    #and rewear/wield things
     trigger /^You remove a canvas backpack/, :rewear_pack
     trigger /^You remove a suit of scale mail/, :rewear_armor
     trigger /^You remove flowing violet robes./, :rewear_robe
     trigger /^You remove a flowing blue shirt./, :rewear_shirt
     trigger /^You remove tan coloured leggings./, :rewear_trousers
-    trigger /^You remove a simple pair of wooden sandals../, :rewear_shoes
+    trigger /^You remove a simple pair of wooden sandals/, :rewear_shoes
+    trigger /You cease wielding a cavalry shield in your \w+ hand/, :rewear_shield
+    trigger /You drop a cavalry shield./, :pickup_shield
+    
+    #triggers so you know you put the stuff on
+    trigger /You begin to wield a cavalry shield in your left hand/, :reset_shield
+    trigger /You are now wearing tan coloured leggings./, :reset_trousers
+    trigger /You are now wearing a flowing blue shirt./, :reset_shirt
+    trigger /You are now wearing a suit of scale mail./, :reset_armor
+    trigger /You are now wearing flowing violet robes./, :reset_robe
+    trigger /You are now wearing a canvas backpack./, :reset_pack
+    trigger /You are now wearing a simple pair of wooden sandals./, :reset_shoe
     
     #After we gain balance, check if we need to rewear something!
     after Character, :is_balanced, :rewear?
@@ -73,6 +90,49 @@ class Antitheft < BasePlugin
     end
   end
   
+  def rewear_shield
+    if @anti_theft
+      @shieldbalance = true
+      send_kmuddy_command("wear #{@thefthash["shield"]}")
+    end
+  end
+  
+  def reset_shield
+    @shieldbalance = false
+  end
+  
+  def reset_trousers
+    @trouserbalance = false
+  end
+  
+  def reset_shirt
+    @shirtbalance = false
+  end
+  
+  def reset_armor
+    @armorbalance = false      
+  end
+  
+  def reset_robe
+    @robebalance = false
+  end
+  
+  def reset_pack
+    @packbalance = false
+  end
+  
+  def reset_shoe
+    @shoebalance = false
+  end
+  
+  def pickup_shield
+    if @anti_theft
+      send_kmuddy_command("Get #{@thefthash["shield"]}")
+      send_kmuddy_command("wield #{@thefthash["shield"]}")
+      @shieldbalance = true
+    end
+  end
+  
   def rewear_shirt
     if @anti_theft
       @shirtbalance = true
@@ -114,6 +174,10 @@ class Antitheft < BasePlugin
     elsif @armorbalance
       send_kmuddy_command("wear #{@thefthash["armor"]}")
       @armorbalance = false
+      
+    elsif @shieldbalance
+      send_kmuddy_command("wear #{@thefthash["shield"]}")
+      @shieldbalance = false
         
     elsif @shoebalance
       send_kmuddy_command("wear #{@thefthash["shoes"]}")

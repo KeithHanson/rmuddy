@@ -16,7 +16,8 @@ class Tarot < BasePlugin
     trigger /You have successfully inscribed/, :decrement_counter #we did it!
     trigger /^You lack the mental resources to etch a Tarot card./, :out_of_mana! #oops, ran out of mana
     trigger /^None of your decks contain a card with the image of (.+)/, :aint_got_it
-    
+    after Character, :is_balanced, :fling_card
+    after Character, :gained_equilibrium, :fling_card
     #setup variables here... comment specific bits if necessary for sanity
     
     #because I like some things to be stored as variables for easy changing later... formatting sheit mostly
@@ -28,6 +29,7 @@ class Tarot < BasePlugin
     
     #by default, we are not, in fact, inscribing, activating, or charging any cards
     @tarotcards = %w(Sun Emperor Magician Priestess Fool Chariot Hermit Empress Lovers Hierophant Hangedman Tower Wheel Creator Justice Star Aeon Lust Universe Devil Moon Death)
+    @groundonly = %w(Chariot Hermit Universe)
     @charginghermit = false
     @paused = false
     @batch_total = 0
@@ -50,9 +52,9 @@ class Tarot < BasePlugin
   #this is the receptacle into which your commands for non-hermit flinging should go
   def tarot_card (card = '', target = 'ground')
     #determine what card to outd, outd it, then charge it
-    if ! @tarotcards.include? (card)
+    if ! @tarotcards.downcase.include? (card.downcase)
       warn("Cereally Dude, tell me what to fling assmunch.. Make it an actual tarot card, even... then gimme a target, eh?")
-    elsif @groundonly.include? (card)
+    elsif @groundonly.downcase.include? (card.downcase)
       @card_to_fling = card
       @target = "ground"
       send_kmuddy_command("outd #{@card_to_fling}")
@@ -73,21 +75,30 @@ class Tarot < BasePlugin
   #So we know it's charged, and can fling that biatch
   def charged
     @charging = false
+    @charged = true
+    fling_card
+  end
+  def fling_card
     #fling the card as commanded... and do the correct one, at whom, and do it
-    if @card_to_fling != '' && @target != ''
+    if @card_to_fling != '' && @target != '' && plugins[Character].balanced && plugins[Character].has_equilibrium && @charged
       send_kmuddy_command("fling #{@card_to_fling} at #{@target}")
+      @card_to_fling = ''
+      @target = ''
+      uncharged
       if @card_to_fling.downcase == 'hermit'
         @charginghermit = false
         @hermithash.delete(@key.to_s)
       end
-      @card_to_fling = ''
-      @target = ''
     end
    end
   
   #in case we need it later
   def charging
     @charging = true
+  end
+  
+  def uncharged
+    @charged = false
   end
   
   #so... you tried to outd a card you don't have...
