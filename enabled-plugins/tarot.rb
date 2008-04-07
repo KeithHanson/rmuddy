@@ -38,8 +38,9 @@ class Tarot < BasePlugin
     @type_to_inscribe = ""
     @card_to_fling = ''
     @target = ''
-    @tarotcards.each{ |key| warn("Full Tarot list: #{key}") }
-    @groundonly.each {|key| warn("Ground Only: #{key}")}
+    @charging = false
+    @charged = false
+    
     #do any other actual setup work here
     warn("Loading hermit locations database")
     unless File.open("configs/hermithash.yaml") {|fi| @hermithash = YAML.load(fi)}
@@ -131,7 +132,7 @@ class Tarot < BasePlugin
   
   #so... you tried to outd a card you don't have...
   def aint_got_it(match_object = '')
-    warn("You tried to get a #{match_object} but you don't have one, man.")
+    warn("You tried to get a #{match_object[1]} but you don't have one, man.")
     @card_to_fling = ''
     @target = ''
   end

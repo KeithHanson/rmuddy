@@ -54,6 +54,9 @@ class Ratter < BasePlugin
     trigger /Nothing can be seen here by that name./, :no_rats!
     trigger /You detect nothing here by that name./, :no_rats!
     trigger /You cannot see that being here./, :no_rats!
+    
+    #So, you walked away and your character fell asleep.. that's cool, he'll wake up eventually... but not standup
+    trigger /You must be standing first/, :standup
 
     #disable and enable the scripts with "rats" in the mud.
     trigger /You will now notice the movement of rats\. Happy hunting\!/, :enable_ratter
@@ -125,6 +128,10 @@ class Ratter < BasePlugin
     #send updated stats
     set_kmuddy_variable("current_rat_count", @inventory_rats)
     set_kmuddy_variable("total_rat_money", @total_rat_money)
+  end
+  
+  def standup
+    send_kmuddy_command("stand")
   end
   
   def no_rats!
