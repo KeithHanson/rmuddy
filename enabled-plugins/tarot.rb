@@ -28,8 +28,8 @@ class Tarot < BasePlugin
     @resethash = {"Location" => "card number"}
     
     #by default, we are not, in fact, inscribing, activating, or charging any cards
-    @tarotcards = %w(Sun Emperor Magician Priestess Fool Chariot Hermit Empress Lovers Hierophant Hangedman Tower Wheel Creator Justice Star Aeon Lust Universe Devil Moon Death)
-    @groundonly = %w(Chariot Hermit Universe)
+    @tarotcards = %w(sun emperor magician priestess fool chariot hermit empress lovers hierophant hangedman tower wheel creator justice star aeon lust universe devil moon death)
+    @groundonly = %w(chariot hermit universe)
     @charginghermit = false
     @paused = false
     @batch_total = 0
@@ -38,7 +38,8 @@ class Tarot < BasePlugin
     @type_to_inscribe = ""
     @card_to_fling = ''
     @target = ''
-    
+    @tarotcards.each{ |key| warn("Full Tarot list: #{key}") }
+    @groundonly.each {|key| warn("Ground Only: #{key}")}
     #do any other actual setup work here
     warn("Loading hermit locations database")
     unless File.open("configs/hermithash.yaml") {|fi| @hermithash = YAML.load(fi)}
@@ -52,24 +53,51 @@ class Tarot < BasePlugin
   #this is the receptacle into which your commands for non-hermit flinging should go
   def tarot_card (card = '', target = 'ground')
     #determine what card to outd, outd it, then charge it
-    if ! @tarotcards.downcase.include? (card.downcase)
-      warn("Cereally Dude, tell me what to fling assmunch.. Make it an actual tarot card, even... then gimme a target, eh?")
-    elsif @groundonly.downcase.include? (card.downcase)
-      @card_to_fling = card
-      @target = "ground"
-      send_kmuddy_command("outd #{@card_to_fling}")
-      send_kmuddy_command("charge #{@card_to_fling}")
-    else 
-      @card_to_fling = card
-      @target = target
-      send_kmuddy_command("outd #{@card_to_fling}")
-      send_kmuddy_command("charge #{@card_to_fling}")
+    warn("Ok, we're gonna use #{card} on #{target}")
+    @card_to_fling = card.downcase
+    @target = target.downcase
+    if @tarotcards.include?(@card_to_fling)
+      warn("It's a real tarot card!")
+      if @groundonly.include?(@card_to_fling)
+        @target = "ground"
+        send_kmuddy_command("outd #{@card_to_fling}")
+        send_kmuddy_command("charge #{@card_to_fling}")
+      else
+        send_kmuddy_command("outd #{@card_to_fling}")
+        send_kmuddy_command("charge #{@card_to_fling}")
+      end
+    else
+      warn("Ok... I need a real tarot card, and who/what to fling it at... if it's the ground, you may omit the target")
     end
   end
   
   #cuz we might want some help for the tarot module
-  def help
-    #I'd put some help stuff here, if I were me
+  def help (topic = '')
+    if topic == ''
+      warn("Specificy a topic: inscribe, hermit, or use")
+    elsif topic.downcase == "inscribe"
+      warn("To inscribe, /notify 4567 Tarot mass_inscribe <number to inscribe> <type of tarot to inscribe>")
+      warn("Then /notify 4567 Tarot begin_inscribing to actually begin the inscription process")
+      warn("/notify 4567 (un)pause_inscription will (un)pause the batch inscription process")
+      warn("I doubt it has to be said, but just in case, that's pause_inscript or unpause_inscription, with no ()")
+      blank_line
+    elsif topic.downcase == "hermit"
+      warn("For hermit tracking, you can use /notify 4567 Tarot activate_hermit <what you want to call this place>")
+      warn("this will outd a hermit, check its card number, then activate it and put it away, storing it in our database")
+      warn("/notify 4567 Tarot fling_hermit <whereyawannago> will then grab the appropriate hermit (based on the same name you gave it when you did activate_hermit)")
+      warn("charge the hermit, and then fling it. It will at this point delete it from the database of hermit locations")
+      warn("/notify 4567 Tarot del_hash <which room to delete> will remove the room you tell it to remove from the hermit locations database")
+      warn("/notify 4567 Tarot reset_hash will wipe the entire database, if all of your hermits have decayed")
+      blank_line
+    elsif topic.downcase == "use"
+      warn("this is very basic tarot card usage here... but essentially you would")
+      warn("/notify 4567 Tarot tarot_card <which card to throw> <who/what to throw it at>")
+      warn("it should then outd the card, charge the card, and after the card is charged fling it the next time you regain equilibrium/balance")
+      blank_line
+    else
+      warn("Please specify a valid topic: inscribe, hermit, or use")
+    end
+    
   end
   
   #So we know it's charged, and can fling that biatch
