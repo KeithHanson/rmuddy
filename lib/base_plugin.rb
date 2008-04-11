@@ -20,7 +20,6 @@ class BasePlugin
       @receiver.enabled_plugins.delete(self)
       @receiver.disabled_plugins << self
     end
-    warn("#{self.class.to_s} Plugin has been disabled.")
   end
 
   def enable
@@ -28,7 +27,6 @@ class BasePlugin
       @receiver.disabled_plugins.delete(self)
       @receiver.enabled_plugins << self
     end
-    warn("#{self.class.to_s} Plugin has been enabled.")
   end
 
   def help

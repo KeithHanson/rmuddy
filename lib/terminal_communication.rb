@@ -2,7 +2,7 @@
 #Modified for use with RMuddy specifically by Demonnic. 
 require 'socket'
 
-module KMuddy
+module TerminalCommunication
     ANSI = { "reset"     => "\e[0m",    "bold"       => "\e[1m",
                      "underline" => "\e[4m",    "blink"      => "\e[5m",
                      "reverse"   => "\e[7m",    "invisible"  => "\e[8m",

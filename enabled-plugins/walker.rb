@@ -9,8 +9,8 @@ class Walker < BasePlugin
   attr_accessor :back_tracking
 
   def setup
-    warn("***The Auto Walker will fully automate your ratting and is considered ILLEGAL by Achaea.***")
-    warn("***Use at your own risk!***")
+    output "   #{ANSI["lightgreen"]}Walker#{ANSI["red"]}: This plugin fully automates Ratting.#{ANSI["reset"]}"
+    output "   #{ANSI["lightgreen"]}Walker#{ANSI["red"]}: Use at your own risk!#{ANSI["reset"]}\n"
  
     #When we backtrack along the rail, we'll need these.
     @opposite_directions = { "n" => "s", "s" => "n", "e" => "w", "w" => "e", "ne" => "sw", "sw" => "ne", "nw" => "se", "se" => "nw", "in" => "out", "out" => "in", "u" => "d", "d" => "u"} 

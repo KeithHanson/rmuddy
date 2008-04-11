@@ -42,11 +42,11 @@ class Tarot < BasePlugin
     @charged = false
     
     #do any other actual setup work here
-    warn("Loading hermit locations database")
+    output "   #{ANSI["lightgreen"]}Tarot#{ANSI["red"]}: Loading hermit locations database#{ANSI["reset"]}"
     unless File.open("configs/hermithash.yaml") {|fi| @hermithash = YAML.load(fi)}
       warn("Failed to find and load the hermit database. You need to have hermithash.yaml in the configs directory")
     else
-      warn("Hermit database loaded")
+      output "   #{ANSI["lightgreen"]}Tarot#{ANSI["red"]}: Hermit database loaded#{ANSI["reset"]}"
     end
     send_kmuddy_command("ind 50 hermit")
   end

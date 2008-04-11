@@ -1,24 +1,57 @@
 class Receiver
   
   attr_accessor :varsock, :enabled_plugins, :disabled_plugins, :queue
-  
+  attr_accessor :local_session, :remote_session, :communications_ready
+
+  def echo(text)
+    if communications_ready
+      @local_session.write(text)
+    end
+  end
+
+  def send_command(text)
+    if communications_ready
+      @remote_session.write(text)
+    end
+  end
+
   def plugins
     @enabled_plugins
   end
 
-  debug("Receiver: Loading Files...")
+  def banner
+    <<-EOF
+#{ANSI["lightred"]}
+     _____ ____ _____
+    /    /      \\    \\
+  /____ /_________\\____\\
+  \\    \\          /    /
+    \\  \\        /  /
+        \\ \\    / /
+          \\ \\/ /
+            \\/
+#{ANSI["reset"]}
+      #{ANSI["lightred"]}RMuddy v0.9#{ANSI["reset"]}
+   A Pure Ruby System
+        For MUDs
+
+#{ANSI["red"]}**RMuddy Will Begin It's Initialization Now.**#{ANSI["reset"]}
+EOF
+  end
 
   #Load All Plugins
-  Dir[File.join(File.dirname(__FILE__), "enabled-plugins", "*.rb")].each do |file|
-    debug("Receiver: Found #{file}")
+  Dir[File.join(File.dirname(__FILE__), "../enabled-plugins", "*.rb")].each do |file|
     require file
     attr_accessor File.basename(file, ".rb").to_sym
   end
   
   def initialize
-    warn("System Loading...")
+    
+
     @queue = []
     @enabled_plugins = []
+    @communication_ready = false
+    output banner
 
     class << @enabled_plugins
       alias_method :original_indexer, :[]
@@ -58,37 +91,21 @@ class Receiver
       end
     end
     
-    Dir[File.join(File.dirname(__FILE__), "enabled-plugins", "*.rb")].each do |file|
+    Dir[File.join(File.dirname(__FILE__), "../enabled-plugins", "*.rb")].each do |file|
       basename = File.basename(file, ".rb")
       class_string = basename.split("_").each{|part| part.capitalize!}.join("")
-
+      output "#{ANSI["lightred"]}**RMuddy found and loaded plugin: #{ANSI["lightgreen"]}#{class_string}#{ANSI["lightred"]}**#{ANSI["reset"]}"
       instantiated_class = Object.module_eval(class_string).new(self)
       instantiated_class.enable
     end
-    
-    Thread.new do
-      while true do
-        sleep 0.03
-        if @queue.length > 0
-          element = @queue.shift
-          case element[0]
-          when "set_var"
-            @varsock.set(element[1], element[2])
-          when "send_command"
-            @varsock.command(element[1])
-          end
-        end
-      end
-    end
 
-    bar_line
-    warn("You may send commands to RMuddy's plugins like so:")
-    warn("/notify 4567 PluginName action_name arg1 arg2 arg3")
-    bar_line
-    warn("You may ask a plugin for help by doing:")
-    warn("/notify 4567 PluginName help")
-    bar_line
-    warn("System Ready!")
+#     bar_line
+#     warn("You may send commands to RMuddy's plugins like so:")
+#     warn("/notify 4567 PluginName action_name arg1 arg2 arg3")
+#     bar_line
+#     warn("You may ask a plugin for help by doing:")
+#     warn("/notify 4567 PluginName help")
+#     bar_line
   end
   
   def bar_line
